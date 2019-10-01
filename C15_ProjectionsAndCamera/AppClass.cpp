@@ -17,7 +17,7 @@ void Application::InitVariables(void)
 	m_pMesh->GenerateTorus(3.0f, 2.0f, 7, 7, C_RED);
 
 	m_pMesh2 = new MyMesh();
-	m_pMesh2->GenerateCone(0.5f, 1.0f, 6, C_GREEN);
+	m_pMesh2->GenerateCone(0.5f, 1.0f, 6, C_WHITE);
 
 	//create a new camera
 	m_pCamera = new MyCamera();
@@ -55,7 +55,16 @@ void Application::Display(void)
 	//draw the primitive
 	//m_pMesh->Render(m_pCamera->GetProjectionMatrix(), m_pCamera->GetViewMatrix(), ToMatrix4(m_qArcBall));
 	//m_pMesh->Render(m_pCamera, ToMatrix4(m_qArcBall));
-	m_pMesh2->Render(m_pCamera, glm::translate(vector3(0.0f, 0.0f, -5.0f)));
+
+	matrix4 m4Model = glm::translate(vector3(0.0f, 0.0f, 0.0f));
+	matrix4 m4View = m_pCamera->GetViewMatrix();
+	matrix4 m4Projection = m_pCamera->GetProjectionMatrix();
+
+	//m4Projection = IDENTITY_M4;
+	
+	m4View = glm::lookAt(m_v3Position, m_v3Target, m_v3Upwards);
+
+	m_pMesh2->Render(m4Projection, m4View, m4Model);
 
 	//render list call
 	m_uRenderCallCount = m_pMeshMngr->Render();
