@@ -52,13 +52,24 @@ void Application::Display(void)
 	m_pCamera->SetTarget(vector3(fPos, 0.0f, 9.0f));
 	fPos -= 0.01f;
 
-	//draw the primitive
-	//m_pMesh->Render(m_pCamera->GetProjectionMatrix(), m_pCamera->GetViewMatrix(), ToMatrix4(m_qArcBall));
-	//m_pMesh->Render(m_pCamera, ToMatrix4(m_qArcBall));
-
 	matrix4 m4Model = glm::translate(vector3(0.0f, 0.0f, 0.0f));
 	matrix4 m4View = m_pCamera->GetViewMatrix();
 	matrix4 m4Projection = m_pCamera->GetProjectionMatrix();
+
+	int width = m_pSystem->GetWindowWidth();
+	int height = m_pSystem->GetWindowHeight();
+
+	// Orthographic projection view -> glm::ortho
+	// This projection has us seeing everything within 5 units of the center
+	// This stretches things in our rectangular window
+	// Change the window size to fix stretching
+	//m4Projection = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, 0.001f, 100.0f);
+
+	m4Projection = glm::perspective(45.0f, static_cast<float>(width) / static_cast<float>(height), 0.001f, 100.0f);
+
+	//draw the primitive
+	//m_pMesh->Render(m_pCamera->GetProjectionMatrix(), m_pCamera->GetViewMatrix(), ToMatrix4(m_qArcBall));
+	//m_pMesh->Render(m_pCamera, ToMatrix4(m_qArcBall));
 
 	//m4Projection = IDENTITY_M4;
 	
