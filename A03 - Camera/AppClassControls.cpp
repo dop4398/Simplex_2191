@@ -387,17 +387,59 @@ void Application::ProcessKeyboard(void) // ***************************** add con
 		fSpeed *= 5.0f;
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
-		m_pCamera->MoveForward(fSpeed);
-	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
-		m_pCamera->MoveForward(-fSpeed);
+	{
+		// Deduct from the z values of the position and target
+		m_pCamera->SetPositionTargetAndUpward(
+			vector3(m_pCamera->GetPosition().x, m_pCamera->GetPosition().y, m_pCamera->GetPosition().z - fSpeed),
+			vector3(m_pCamera->GetTarget().x, m_pCamera->GetTarget().y, m_pCamera->GetTarget().z - fSpeed),
+			vector3(0.0f, 1.0f, 0.0f)
+		);
+	}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+	{
+		// Add to the z values of the position and target
+		m_pCamera->SetPositionTargetAndUpward(
+			vector3(m_pCamera->GetPosition().x, m_pCamera->GetPosition().y, m_pCamera->GetPosition().z + fSpeed),
+			vector3(m_pCamera->GetTarget().x, m_pCamera->GetTarget().y, m_pCamera->GetTarget().z + fSpeed),
+			vector3(0.0f, 1.0f, 0.0f)
+		);
+	}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+	{
+		// Deduct from the x values of the position and target
+		m_pCamera->SetPositionTargetAndUpward(
+			vector3(m_pCamera->GetPosition().x - fSpeed, m_pCamera->GetPosition().y, m_pCamera->GetPosition().z),
+			vector3(m_pCamera->GetTarget().x - fSpeed, m_pCamera->GetTarget().y, m_pCamera->GetTarget().z),
+			vector3(0.0f, 1.0f, 0.0f)
+		);
+	}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-		m_pCamera->MoveSideways(fSpeed);
-	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
-		m_pCamera->MoveSideways(-fSpeed);
+	{
+		// Add to the x values of the position and target
+		m_pCamera->SetPositionTargetAndUpward(
+			vector3(m_pCamera->GetPosition().x + fSpeed, m_pCamera->GetPosition().y, m_pCamera->GetPosition().z),
+			vector3(m_pCamera->GetTarget().x + fSpeed, m_pCamera->GetTarget().y, m_pCamera->GetTarget().z),
+			vector3(0.0f, 1.0f, 0.0f)
+		);
+	}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
+	{
+		// Deduct from the y values of the position and target
+		m_pCamera->SetPositionTargetAndUpward(
+			vector3(m_pCamera->GetPosition().x, m_pCamera->GetPosition().y - fSpeed, m_pCamera->GetPosition().z),
+			vector3(m_pCamera->GetTarget().x, m_pCamera->GetTarget().y - fSpeed, m_pCamera->GetTarget().z),
+			vector3(0.0f, 1.0f, 0.0f)
+		);
+	}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::E))
-		m_pCamera->MoveVertical(fSpeed);
-	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
-		m_pCamera->MoveVertical(-fSpeed);
+	{
+		// Add to the y values of the position and target
+		m_pCamera->SetPositionTargetAndUpward(
+			vector3(m_pCamera->GetPosition().x, m_pCamera->GetPosition().y + fSpeed, m_pCamera->GetPosition().z),
+			vector3(m_pCamera->GetTarget().x, m_pCamera->GetTarget().y + fSpeed, m_pCamera->GetTarget().z),
+			vector3(0.0f, 1.0f, 0.0f)
+		);
+	}
 #pragma endregion
 }
 //Joystick
