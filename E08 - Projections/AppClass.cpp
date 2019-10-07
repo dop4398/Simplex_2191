@@ -54,21 +54,61 @@ void Application::Display(void)
 		break;
 	case 2:
 		m_pCamera->ResetCamera();
+		// false for orthographic camera
+		m_pCamera->SetPerspective(false);
+		// parameters are three vector3s in the given order
+		m_pCamera->SetPositionTargetAndUpward(
+			vector3(0.0f, 0.0f, 15.0f),
+			vector3(0.0f, 0.0f, -1.0f),
+			vector3(0.0f, 1.0f, 0.0f));
 		break;
 	case 3:
 		m_pCamera->ResetCamera();
+		m_pCamera->SetPositionTargetAndUpward(
+			vector3(25.0f, 0.0f, 0.0f),
+			vector3(0.0f, 0.0f, -1.0f),
+			vector3(0.0f, 0.0f, -1.0f));
 		break;
 	case 4:
 		m_pCamera->ResetCamera();
+		m_pCamera->ResetCamera();
+		m_pCamera->ResetCamera();
+		// false for orthographic camera
+		m_pCamera->SetPerspective(true);
+		// parameters are three vector3s in the given order
+		m_pCamera->SetPositionTargetAndUpward(
+			vector3(0.0f, 0.0f, -15.0f),
+			vector3(0.0f, 0.0f, 1.0f),
+			vector3(0.0f, 1.0f, 0.0f));
 		break;
 	case 5:
 		m_pCamera->ResetCamera();
+		// false for orthographic camera
+		m_pCamera->SetPerspective(true);
+		// parameters are three vector3s in the given order
+		m_pCamera->SetPositionTargetAndUpward(
+			vector3(0.0f, 0.0f, -15.0f),
+			vector3(0.0f, 0.0f, 1.0f),
+			vector3(0.0f, 1.0f, 0.0f));
+		// Set the view distance
+		m_pCamera->SetNearFar(vector2(5.0f, 100.0f));
 		break;
 	case 6:
 		m_pCamera->ResetCamera();
+		// false for orthographic camera
+		m_pCamera->SetPerspective(true);
+		// parameters are three vector3s in the given order
+		m_pCamera->SetPositionTargetAndUpward(
+			vector3(0.0f, 0.0f, -15.0f),
+			vector3(0.0f, 0.0f, 1.0f),
+			vector3(0.0f, 1.0f, 0.0f));
+		// Set the view distance
+		m_pCamera->SetNearFar(vector2(1.0f, 11.0f));
 		break;
 	case 7:
 		m_pCamera->ResetCamera();
+		// Swap up and down
+		m_pCamera->SetUp(vector3(0.0f, -1.0f, 0.0f));
 		break;
 	}
 
