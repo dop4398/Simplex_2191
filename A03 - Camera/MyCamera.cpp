@@ -152,33 +152,57 @@ void Simplex::MyCamera::CalculateProjectionMatrix(void)
 
 void MyCamera::MoveForward(float a_fDistance)
 {
-	/*GetViewMatrix();
-	for (int i = 0; i < 3; i++)
-	{
-		m_m4View[2][i] += a_fDistance;
-	}*/
+	// Forward vector
+	vector3 v3Forward = glm::normalize(vector3(
+		m_v3Target.x - m_v3Position.x,
+		m_v3Target.y - m_v3Position.y,
+		m_v3Target.z - m_v3Position.z
+	));
 
-	//The following is just an example and does not take in account the forward vector (AKA view vector)
-	/*m_v3Position += vector3(m_m4View[0][0], m_m4View[1][0], m_m4View[2][0]);
-	m_v3Target += vector3(m_m4View[0][1], m_m4View[1][1], m_m4View[2][1]);
-	m_v3Above += vector3(m_m4View[0][2], m_m4View[1][2], m_m4View[2][2]);*/
-
-	m_v3Position += vector3(0.0f, 0.0f, a_fDistance);
-	m_v3Target += vector3(0.0f, 0.0f, a_fDistance);
-	m_v3Above += vector3(0.0f, 0.0f, a_fDistance);
+	m_v3Position += v3Forward * a_fDistance;
+	m_v3Target += v3Forward * a_fDistance;
+	m_v3Above += v3Forward * a_fDistance;
 }
 
 void MyCamera::MoveVertical(float a_fDistance)
 {
-	m_v3Position += vector3(0.0f, a_fDistance, 0.0f);
-	m_v3Target += vector3(0.0f, a_fDistance, 0.0f);
-	m_v3Above += vector3(0.0f, a_fDistance, 0.0f);
+	// Forward vector
+	vector3 v3Forward = glm::normalize(vector3(
+		m_v3Target.x - m_v3Position.x,
+		m_v3Target.y - m_v3Position.y,
+		m_v3Target.z - m_v3Position.z
+	));
+	// Rotate it 90 degrees about the x axis
+	matrix3 m3RotateX = {
+		{1, 0, 0},
+		{0, 0, 1},
+		{0, -1, 0}
+	};
+	vector3 v3Up = glm::normalize(v3Forward * m3RotateX);
+
+	m_v3Position += v3Up * a_fDistance;
+	m_v3Target += v3Up * a_fDistance;
+	m_v3Above += v3Up * a_fDistance;
 }
 void MyCamera::MoveSideways(float a_fDistance)
 {
-	m_v3Position += vector3(a_fDistance, 0.0f, 0.0f);
-	m_v3Target += vector3(a_fDistance, 0.0f, 0.0f);
-	m_v3Above += vector3(a_fDistance, 0.0f, 0.0f);
+	// Forward vector
+	vector3 v3Forward = glm::normalize(vector3(
+		m_v3Target.x - m_v3Position.x,
+		m_v3Target.y - m_v3Position.y,
+		m_v3Target.z - m_v3Position.z
+	));
+	// Rotate it 90 degrees about the y axis
+	matrix3 m3RotateY = {
+		{0, 0, -1},
+		{0, 1, 0},
+		{1, 0, 0}
+	};
+	vector3 v3Right = glm::normalize(v3Forward * m3RotateY);
+
+	m_v3Position += v3Right * a_fDistance;
+	m_v3Target += v3Right * a_fDistance;
+	m_v3Above += v3Right * a_fDistance;
 }
 
 quaternion Simplex::MyCamera::ChangePitch(float a_fAngle)

@@ -395,12 +395,12 @@ void Application::ProcessKeyboard(void) // ***************************** add con
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
 	{
-		m_pCamera->MoveForward(-fSpeed);
+		m_pCamera->MoveForward(fSpeed);
 	}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
 	{
 		// Add to the z values of the position and target
-		m_pCamera->MoveForward(fSpeed);
+		m_pCamera->MoveForward(-fSpeed);
 	}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
 	{
