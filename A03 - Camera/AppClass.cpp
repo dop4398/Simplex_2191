@@ -51,6 +51,8 @@ void Application::Display(void)
 	m_pCameraMngr->SetProjectionMatrix(m_pCamera->GetProjectionMatrix());
 	m_pCameraMngr->SetViewMatrix(m_pCamera->GetViewMatrix());
 
+
+
 	//Render the list of MyMeshManager
 	m_pMyMeshMngr->Render();
 	

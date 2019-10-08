@@ -16,6 +16,7 @@ namespace Simplex
 
 class Application
 {
+	quaternion m_qOrientation; // orientation for the camera in quaternions
 	MyCamera* m_pCamera = nullptr; //Camera class
 	MyMeshManager* m_pMyMeshMngr = nullptr; //My Mesh Manager
 	String m_sProgrammer = "Alberto Bobadilla - labigm@rit.edu"; //Programmer

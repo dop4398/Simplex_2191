@@ -181,14 +181,20 @@ void MyCamera::MoveSideways(float a_fDistance)
 	m_v3Above += vector3(a_fDistance, 0.0f, 0.0f);
 }
 
-void Simplex::MyCamera::ChangePitch(float a_fAngle)
+quaternion Simplex::MyCamera::ChangePitch(float a_fAngle)
 {
-	// need to slerp here to find the point to go to 
-	m_v3Target += vector3();
-	m_v3Above += vector3(0.0f, 0.0f, a_fAngle);
+	// Change to radians for trig
+	//float fTheta = glm::radians(a_fAngle);
+	//// need to slerp here to find the point to go to 
+	//m_v3Target += vector3(0.0f, sin(fTheta), cos(fTheta)); // z axis
+	//m_v3Above += vector3(0.0f, cos(fTheta), -sin(fTheta)); // y axis
+
+	quaternion q1 = glm::angleAxis(a_fAngle, vector3(1.0f, 0.0f, 0.0f));
+	return q1;
 }
 
-void Simplex::MyCamera::ChangeYaw(float a_fAngle)
+quaternion Simplex::MyCamera::ChangeYaw(float a_fAngle)
 {
-	m_v3Above += vector3(0.0f, a_fAngle, 0.0f);
+	quaternion q1 = glm::angleAxis(a_fAngle, vector3(0.0f, 1.0f, 0.0f));
+	return q1;
 }
