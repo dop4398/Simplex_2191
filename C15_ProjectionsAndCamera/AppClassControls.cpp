@@ -402,7 +402,7 @@ void Application::ProcessKeyboard(void)
 		m_pCameraMngr->MoveForward(fSpeed);
 		m_v3Position.z += 0.05f;
 		m_v3Target.z += 0.05f;
-	}		
+	}
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
 	{
