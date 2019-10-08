@@ -368,6 +368,13 @@ void Application::CameraRotation(float a_fSpeed)
 		fDeltaMouse = static_cast<float>(MouseY - CenterY);
 		fAngleX += fDeltaMouse * a_fSpeed;
 	}
+
+	m_pCamera->SetPositionTargetAndUpward(
+		vector3(m_pCamera->GetPosition().x, m_pCamera->GetPosition().y, m_pCamera->GetPosition().z),
+		vector3(m_pCamera->GetTarget().x + fAngleX, m_pCamera->GetTarget().y + fAngleY, m_pCamera->GetTarget().z),
+		vector3(0.0f, 1.0f, 0.0f)
+	);
+
 	//Change the Yaw and the Pitch of the camera
 	SetCursorPos(CenterX, CenterY);//Position the mouse in the center
 }
