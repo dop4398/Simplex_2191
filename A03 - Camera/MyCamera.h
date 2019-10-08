@@ -230,6 +230,18 @@ public:
 	OUTPUT: ---
 	*/
 	void MoveSideways(float a_fDistance = 0.1f);
+	/*
+	USANGE: Changes the pitch of the camera based on mouse input
+	ARGUMENTS: angle to change (in degrees)
+	OUTPUT: ---
+	*/
+	void ChangePitch(float a_fAngle);
+	/*
+	USANGE: Changes the yaw of the camera based on mouse input
+	ARGUMENTS: angle to change (in degrees)
+	OUTPUT: ---
+	*/
+	void ChangeYaw(float a_fAngle);
 };
 
 } //namespace Simplex

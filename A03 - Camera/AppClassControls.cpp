@@ -350,32 +350,29 @@ void Application::CameraRotation(float a_fSpeed)
 	if (MouseX < CenterX)
 	{
 		fDeltaMouse = static_cast<float>(CenterX - MouseX);
-		fAngleY += fDeltaMouse * a_fSpeed;
+		fAngleX += fDeltaMouse * a_fSpeed;
 	}
 	else if (MouseX > CenterX)
 	{
 		fDeltaMouse = static_cast<float>(MouseX - CenterX);
-		fAngleY -= fDeltaMouse * a_fSpeed;
+		fAngleX -= fDeltaMouse * a_fSpeed;
 	}
 
 	if (MouseY < CenterY)
 	{
 		fDeltaMouse = static_cast<float>(CenterY - MouseY);
-		fAngleX -= fDeltaMouse * a_fSpeed;
+		fAngleY -= fDeltaMouse * a_fSpeed;
 	}
 	else if (MouseY > CenterY)
 	{
 		fDeltaMouse = static_cast<float>(MouseY - CenterY);
-		fAngleX += fDeltaMouse * a_fSpeed;
+		fAngleY += fDeltaMouse * a_fSpeed;
 	}
 
-	m_pCamera->SetPositionTargetAndUpward(
-		vector3(m_pCamera->GetPosition().x, m_pCamera->GetPosition().y, m_pCamera->GetPosition().z),
-		vector3(m_pCamera->GetTarget().x + fAngleX, m_pCamera->GetTarget().y + fAngleY, m_pCamera->GetTarget().z),
-		vector3(0.0f, 1.0f, 0.0f)
-	);
-
 	//Change the Yaw and the Pitch of the camera
+	m_pCamera->ChangeYaw(fAngleX * 0.25);
+	m_pCamera->ChangePitch(fAngleY * 0.25);
+
 	SetCursorPos(CenterX, CenterY);//Position the mouse in the center
 }
 //Keyboard
@@ -395,57 +392,31 @@ void Application::ProcessKeyboard(void) // ***************************** add con
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
 	{
-		// Deduct from the z values of the position and target
-		m_pCamera->SetPositionTargetAndUpward(
-			vector3(m_pCamera->GetPosition().x, m_pCamera->GetPosition().y, m_pCamera->GetPosition().z - fSpeed),
-			vector3(m_pCamera->GetTarget().x, m_pCamera->GetTarget().y, m_pCamera->GetTarget().z - fSpeed),
-			vector3(0.0f, 1.0f, 0.0f)
-		);
+		m_pCamera->MoveForward(-fSpeed);
 	}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
 	{
 		// Add to the z values of the position and target
-		m_pCamera->SetPositionTargetAndUpward(
-			vector3(m_pCamera->GetPosition().x, m_pCamera->GetPosition().y, m_pCamera->GetPosition().z + fSpeed),
-			vector3(m_pCamera->GetTarget().x, m_pCamera->GetTarget().y, m_pCamera->GetTarget().z + fSpeed),
-			vector3(0.0f, 1.0f, 0.0f)
-		);
+		m_pCamera->MoveForward(fSpeed);
 	}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
 	{
 		// Deduct from the x values of the position and target
-		m_pCamera->SetPositionTargetAndUpward(
-			vector3(m_pCamera->GetPosition().x - fSpeed, m_pCamera->GetPosition().y, m_pCamera->GetPosition().z),
-			vector3(m_pCamera->GetTarget().x - fSpeed, m_pCamera->GetTarget().y, m_pCamera->GetTarget().z),
-			vector3(0.0f, 1.0f, 0.0f)
-		);
+		m_pCamera->MoveSideways(-fSpeed);
 	}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
 	{
 		// Add to the x values of the position and target
-		m_pCamera->SetPositionTargetAndUpward(
-			vector3(m_pCamera->GetPosition().x + fSpeed, m_pCamera->GetPosition().y, m_pCamera->GetPosition().z),
-			vector3(m_pCamera->GetTarget().x + fSpeed, m_pCamera->GetTarget().y, m_pCamera->GetTarget().z),
-			vector3(0.0f, 1.0f, 0.0f)
-		);
+		m_pCamera->MoveSideways(fSpeed);
 	}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
 	{
 		// Deduct from the y values of the position and target
-		m_pCamera->SetPositionTargetAndUpward(
-			vector3(m_pCamera->GetPosition().x, m_pCamera->GetPosition().y - fSpeed, m_pCamera->GetPosition().z),
-			vector3(m_pCamera->GetTarget().x, m_pCamera->GetTarget().y - fSpeed, m_pCamera->GetTarget().z),
-			vector3(0.0f, 1.0f, 0.0f)
-		);
+		m_pCamera->MoveVertical(-fSpeed);
 	}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::E))
 	{
-		// Add to the y values of the position and target
-		m_pCamera->SetPositionTargetAndUpward(
-			vector3(m_pCamera->GetPosition().x, m_pCamera->GetPosition().y + fSpeed, m_pCamera->GetPosition().z),
-			vector3(m_pCamera->GetTarget().x, m_pCamera->GetTarget().y + fSpeed, m_pCamera->GetTarget().z),
-			vector3(0.0f, 1.0f, 0.0f)
-		);
+		m_pCamera->MoveVertical(fSpeed);
 	}
 #pragma endregion
 }

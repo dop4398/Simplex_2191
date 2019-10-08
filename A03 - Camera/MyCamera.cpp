@@ -152,17 +152,43 @@ void Simplex::MyCamera::CalculateProjectionMatrix(void)
 
 void MyCamera::MoveForward(float a_fDistance)
 {
+	/*GetViewMatrix();
+	for (int i = 0; i < 3; i++)
+	{
+		m_m4View[2][i] += a_fDistance;
+	}*/
+
 	//The following is just an example and does not take in account the forward vector (AKA view vector)
-	m_v3Position += vector3(0.0f, 0.0f,-a_fDistance);
-	m_v3Target += vector3(0.0f, 0.0f, -a_fDistance);
-	m_v3Above += vector3(0.0f, 0.0f, -a_fDistance);
+	/*m_v3Position += vector3(m_m4View[0][0], m_m4View[1][0], m_m4View[2][0]);
+	m_v3Target += vector3(m_m4View[0][1], m_m4View[1][1], m_m4View[2][1]);
+	m_v3Above += vector3(m_m4View[0][2], m_m4View[1][2], m_m4View[2][2]);*/
+
+	m_v3Position += vector3(0.0f, 0.0f, a_fDistance);
+	m_v3Target += vector3(0.0f, 0.0f, a_fDistance);
+	m_v3Above += vector3(0.0f, 0.0f, a_fDistance);
 }
 
 void MyCamera::MoveVertical(float a_fDistance)
 {
-
+	m_v3Position += vector3(0.0f, a_fDistance, 0.0f);
+	m_v3Target += vector3(0.0f, a_fDistance, 0.0f);
+	m_v3Above += vector3(0.0f, a_fDistance, 0.0f);
 }
 void MyCamera::MoveSideways(float a_fDistance)
 {
+	m_v3Position += vector3(a_fDistance, 0.0f, 0.0f);
+	m_v3Target += vector3(a_fDistance, 0.0f, 0.0f);
+	m_v3Above += vector3(a_fDistance, 0.0f, 0.0f);
+}
 
+void Simplex::MyCamera::ChangePitch(float a_fAngle)
+{
+	// need to slerp here to find the point to go to 
+	m_v3Target += vector3();
+	m_v3Above += vector3(0.0f, 0.0f, a_fAngle);
+}
+
+void Simplex::MyCamera::ChangeYaw(float a_fAngle)
+{
+	m_v3Above += vector3(0.0f, a_fAngle, 0.0f);
 }
