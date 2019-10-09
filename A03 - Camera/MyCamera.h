@@ -12,6 +12,9 @@ namespace Simplex
 
 class MyCamera
 {
+	float m_fPitchAngle = 0.0f;
+	float m_fYawAngle = 0.0f;
+
 	vector3 m_v3Position = vector3(0.0f, 0.0f, 10.0f); //Where my camera is located
 	vector3 m_v3Target = vector3(0.0f, 0.0f, 0.0f); //What I'm looking at
 	vector3 m_v3Above = vector3(0.0f, 1.0f, 0.0f); //What is above the camera

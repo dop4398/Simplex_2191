@@ -132,7 +132,29 @@ void Simplex::MyCamera::SetPositionTargetAndUpward(vector3 a_v3Position, vector3
 void Simplex::MyCamera::CalculateViewMatrix(void)
 {
 	//Calculate the look at most of your assignment will be reflected in this method
-	m_m4View = glm::lookAt(m_v3Position, m_v3Target, glm::normalize(m_v3Above - m_v3Position)); //position, target, upward
+	if (m_fPitchAngle > PI / 2)
+		m_fPitchAngle = PI / 2;
+	if (m_fYawAngle > PI / 2)
+		m_fYawAngle = PI / 2;
+	// Yaw
+	// Make the quaternion for m_v3Target
+	quaternion qTarget = glm::quat(GetForwardVector());
+	// Rotate Yaw
+	quaternion qRotationYaw = glm::rotate(qTarget, m_fYawAngle, m_v3Above);
+	// Pitch
+	// Make the quaternion for m_v3Above
+	quaternion qAbove = glm::quat(m_v3Above);
+	// Rotate Pitch
+	quaternion qRotationPitch1 = glm::rotate(qTarget, m_fPitchAngle, GetRightVector());
+	quaternion qRotationPitch2 = glm::rotate(qAbove, m_fPitchAngle, GetRightVector());
+
+	// Apply the changes
+	m_v3Target += vector3(qRotationYaw.y, qRotationYaw.z, qRotationYaw.w);
+	m_v3Target += vector3(qRotationPitch1.y, qRotationPitch1.z, qRotationPitch1.w);
+	m_v3Above += vector3(qRotationPitch2.y, qRotationPitch2.z, qRotationPitch2.w);
+
+
+	m_m4View = glm::lookAt(m_v3Position, m_v3Target, GetUpVector()); //position, target, upward
 }
 
 void Simplex::MyCamera::CalculateProjectionMatrix(void)
@@ -181,57 +203,22 @@ void MyCamera::MoveSideways(float a_fDistance)
 
 void Simplex::MyCamera::ChangePitch(float a_fAngle)
 {
-	// Make a quaternion for the rotation about the x-axis a_fAngle radians, change it to a 4x4 matrix
-	quaternion qRotation = glm::angleAxis(a_fAngle, GetRightVector());
-	matrix4 m4Rotation = glm::toMat4(qRotation);
-	// Make the quaternion for m_v3Target
-	quaternion qTarget = glm::quat(m_v3Target);
-	matrix4 m4Target = glm::toMat4(qTarget);
-	// Make the quaternion for m_v3Above
-	quaternion qAbove = glm::quat(m_v3Above);
-	matrix4 m4Above = glm::toMat4(qAbove);
-	// SLERP time
-	// Target
-	matrix4 m4NewTarget = m4Rotation * m4Target;
-	m4Target = glm::mix(m4Target, m4NewTarget, 0.0f);
-	// Above
-	matrix4 m4NewAbove = m4Rotation * m4Above;
-	m4Above = glm::mix(m4Above, m4NewAbove, 1.0f);
-	// Apply the new values
+	m_fPitchAngle = a_fAngle;
 }
 
 void Simplex::MyCamera::ChangeYaw(float a_fAngle)
 {
-	// Make a quaternion for the rotation about the y-axis a_fAngle radians, change it to a 4x4 matrix
-	quaternion qRotation = glm::angleAxis(a_fAngle, GetUpVector());
-	matrix4 m4Rotation = glm::toMat4(qRotation);
-	matrix3 m3Rotation = glm::toMat3(qRotation);
-	// Make the quaternion for m_v3Target
-	quaternion qTarget = glm::quat(m_v3Target);
-	matrix4 m4Target = glm::toMat4(qTarget);
-	// SLERP time
-	matrix4 m4NewTarget = m4Rotation * m4Target;
-	m4Target = glm::mix(m4Target, m4NewTarget, 0.0f);
-	// Apply the new value
-
+	m_fYawAngle = a_fAngle;
 }
 
 vector3 Simplex::MyCamera::GetForwardVector()
 {
-	return glm::normalize(vector3(
-		m_v3Target.x - m_v3Position.x,
-		m_v3Target.y - m_v3Position.y,
-		m_v3Target.z - m_v3Position.z
-	));
+	return glm::normalize(m_v3Target - m_v3Position);
 }
 
 vector3 Simplex::MyCamera::GetUpVector()
 {
-	return glm::normalize(vector3(
-		m_v3Above.x - m_v3Position.x,
-		m_v3Above.y - m_v3Position.y,
-		m_v3Above.z - m_v3Position.z
-	));
+	return glm::normalize(m_v3Above - m_v3Position);
 }
 
 vector3 Simplex::MyCamera::GetRightVector()
