@@ -153,11 +153,7 @@ void Simplex::MyCamera::CalculateProjectionMatrix(void)
 void MyCamera::MoveForward(float a_fDistance)
 {
 	// Forward vector
-	vector3 v3Forward = glm::normalize(vector3(
-		m_v3Target.x - m_v3Position.x,
-		m_v3Target.y - m_v3Position.y,
-		m_v3Target.z - m_v3Position.z
-	));
+	vector3 v3Forward = GetForwardVector();
 
 	m_v3Position += v3Forward * a_fDistance;
 	m_v3Target += v3Forward * a_fDistance;
@@ -166,19 +162,8 @@ void MyCamera::MoveForward(float a_fDistance)
 
 void MyCamera::MoveVertical(float a_fDistance)
 {
-	// Forward vector
-	vector3 v3Forward = glm::normalize(vector3(
-		m_v3Target.x - m_v3Position.x,
-		m_v3Target.y - m_v3Position.y,
-		m_v3Target.z - m_v3Position.z
-	));
-	// Rotate it 90 degrees about the x axis
-	matrix3 m3RotateX = {
-		{1, 0, 0},
-		{0, 0, 1},
-		{0, -1, 0}
-	};
-	vector3 v3Up = glm::normalize(v3Forward * m3RotateX);
+	// Up vector
+	vector3 v3Up = GetUpVector();
 
 	m_v3Position += v3Up * a_fDistance;
 	m_v3Target += v3Up * a_fDistance;
@@ -186,39 +171,70 @@ void MyCamera::MoveVertical(float a_fDistance)
 }
 void MyCamera::MoveSideways(float a_fDistance)
 {
-	// Forward vector
-	vector3 v3Forward = glm::normalize(vector3(
-		m_v3Target.x - m_v3Position.x,
-		m_v3Target.y - m_v3Position.y,
-		m_v3Target.z - m_v3Position.z
-	));
-	// Rotate it 90 degrees about the y axis
-	matrix3 m3RotateY = {
-		{0, 0, -1},
-		{0, 1, 0},
-		{1, 0, 0}
-	};
-	vector3 v3Right = glm::normalize(v3Forward * m3RotateY);
+	// Right vector
+	vector3 v3Right = GetRightVector();
 
 	m_v3Position += v3Right * a_fDistance;
 	m_v3Target += v3Right * a_fDistance;
 	m_v3Above += v3Right * a_fDistance;
 }
 
-quaternion Simplex::MyCamera::ChangePitch(float a_fAngle)
+void Simplex::MyCamera::ChangePitch(float a_fAngle)
 {
-	// Change to radians for trig
-	//float fTheta = glm::radians(a_fAngle);
-	//// need to slerp here to find the point to go to 
-	//m_v3Target += vector3(0.0f, sin(fTheta), cos(fTheta)); // z axis
-	//m_v3Above += vector3(0.0f, cos(fTheta), -sin(fTheta)); // y axis
-
-	quaternion q1 = glm::angleAxis(a_fAngle, vector3(1.0f, 0.0f, 0.0f));
-	return q1;
+	// Make a quaternion for the rotation about the x-axis a_fAngle radians, change it to a 4x4 matrix
+	quaternion qRotation = glm::angleAxis(a_fAngle, GetRightVector());
+	matrix4 m4Rotation = glm::toMat4(qRotation);
+	// Make the quaternion for m_v3Target
+	quaternion qTarget = glm::quat(m_v3Target);
+	matrix4 m4Target = glm::toMat4(qTarget);
+	// Make the quaternion for m_v3Above
+	quaternion qAbove = glm::quat(m_v3Above);
+	matrix4 m4Above = glm::toMat4(qAbove);
+	// SLERP time
+	// Target
+	matrix4 m4NewTarget = m4Rotation * m4Target;
+	m4Target = glm::mix(m4Target, m4NewTarget, 0.0f);
+	// Above
+	matrix4 m4NewAbove = m4Rotation * m4Above;
+	m4Above = glm::mix(m4Above, m4NewAbove, 1.0f);
+	// Apply the new values
 }
 
-quaternion Simplex::MyCamera::ChangeYaw(float a_fAngle)
+void Simplex::MyCamera::ChangeYaw(float a_fAngle)
 {
-	quaternion q1 = glm::angleAxis(a_fAngle, vector3(0.0f, 1.0f, 0.0f));
-	return q1;
+	// Make a quaternion for the rotation about the y-axis a_fAngle radians, change it to a 4x4 matrix
+	quaternion qRotation = glm::angleAxis(a_fAngle, GetUpVector());
+	matrix4 m4Rotation = glm::toMat4(qRotation);
+	matrix3 m3Rotation = glm::toMat3(qRotation);
+	// Make the quaternion for m_v3Target
+	quaternion qTarget = glm::quat(m_v3Target);
+	matrix4 m4Target = glm::toMat4(qTarget);
+	// SLERP time
+	matrix4 m4NewTarget = m4Rotation * m4Target;
+	m4Target = glm::mix(m4Target, m4NewTarget, 0.0f);
+	// Apply the new value
+
+}
+
+vector3 Simplex::MyCamera::GetForwardVector()
+{
+	return glm::normalize(vector3(
+		m_v3Target.x - m_v3Position.x,
+		m_v3Target.y - m_v3Position.y,
+		m_v3Target.z - m_v3Position.z
+	));
+}
+
+vector3 Simplex::MyCamera::GetUpVector()
+{
+	return glm::normalize(vector3(
+		m_v3Above.x - m_v3Position.x,
+		m_v3Above.y - m_v3Position.y,
+		m_v3Above.z - m_v3Position.z
+	));
+}
+
+vector3 Simplex::MyCamera::GetRightVector()
+{
+	return glm::normalize(glm::cross(GetForwardVector(), GetUpVector()));
 }

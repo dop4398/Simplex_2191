@@ -235,13 +235,17 @@ public:
 	ARGUMENTS: angle to change (in degrees)
 	OUTPUT: ---
 	*/
-	quaternion ChangePitch(float a_fAngle);
+	void ChangePitch(float a_fAngle);
 	/*
 	USANGE: Changes the yaw of the camera based on mouse input
 	ARGUMENTS: angle to change (in degrees)
 	OUTPUT: ---
 	*/
-	quaternion ChangeYaw(float a_fAngle);
+	void ChangeYaw(float a_fAngle);
+
+	vector3 GetForwardVector();
+	vector3 GetUpVector();
+	vector3 GetRightVector();
 };
 
 } //namespace Simplex
