@@ -249,9 +249,23 @@ public:
 	OUTPUT: ---
 	*/
 	void ChangeYaw(float a_fAngle);
-
+	/*
+	USAGE: Sets the Forward vector
+	ARGUMENTS: ---
+	OUTPUT: ---
+	*/
 	void SetForwardVector();
+	/*
+	USAGE: Sets the Upward vector
+	ARGUMENTS: ---
+	OUTPUT: ---
+	*/
 	void SetUpVector();
+	/*
+	USAGE: Sets the Rightward vector
+	ARGUMENTS: ---
+	OUTPUT: ---
+	*/
 	void SetRightVector();
 };
 
