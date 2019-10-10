@@ -63,15 +63,54 @@ void MyRigidBody::Release(void)
 MyRigidBody::MyRigidBody(std::vector<vector3> a_pointList)
 {
 	Init();
-	vector3 v3Average;
-	m_fRadius = 5.0f;
-	for (int i = 0; i < a_pointList.size(); i++)
+	// Check if the list is empty - will break if it is
+	if (a_pointList.size() == 0)
+		return;
+
+	// First attempt - bad, very off-center
+	//vector3 v3Average;
+	////m_fRadius = 5.0f;
+	//for (int i = 0; i < a_pointList.size(); i++)
+	//{
+	//	v3Average += a_pointList[i];
+	//}
+	//v3Average = v3Average / static_cast<float>(a_pointList.size());
+	//// This is a placeholder - not totally correct
+	//m_v3Center = v3Average;
+
+	m_v3MinL = m_v3MaxL = a_pointList[0];
+	for (uint i = 1; i < a_pointList.size(); i++)
 	{
-		v3Average += a_pointList[i];
+		if (m_v3MinL.x > a_pointList[i].x)
+			m_v3MinL.x = a_pointList[i].x;
+		else if (m_v3MaxL.x < a_pointList[i].x)
+			m_v3MaxL.x = a_pointList[i].x;
+
+		if (m_v3MinL.y > a_pointList[i].y)
+			m_v3MinL.y = a_pointList[i].y;
+		else if (m_v3MaxL.y < a_pointList[i].y)
+			m_v3MaxL.y = a_pointList[i].y;
+
+		if (m_v3MinL.z > a_pointList[i].z)
+			m_v3MinL.z = a_pointList[i].z;
+		else if (m_v3MaxL.z < a_pointList[i].z)
+			m_v3MaxL.z = a_pointList[i].z;
 	}
-	v3Average = v3Average / static_cast<float>(a_pointList.size());
-	// This is a placeholder - not totally correct
-	m_v3Center = v3Average;
+	m_v3Center = (m_v3MaxL + m_v3MinL) / 2.0f;
+	m_v3HalfWidth = m_v3MaxL - m_v3MinL;
+	m_fRadius = glm::distance(m_v3Center, m_v3MaxL);
+
+
+	// Find radius
+	// This is a tighter sphere but more square roots are invloved
+	//m_fRadius = glm::distance(m_v3Center, a_pointList[0]);
+	//for (uint i = 1; i < a_pointList.size(); i++)
+	//{
+	//	float fRadius = glm::distance(m_v3Center, a_pointList[i]);
+	//	//m_fRadius = glm::max(m_fRadius, fRadius);
+	//	if (m_fRadius < fRadius)
+	//		m_fRadius = fRadius;
+	//}
 }
 MyRigidBody::MyRigidBody(MyRigidBody const& other)
 {
@@ -112,8 +151,11 @@ void MyRigidBody::AddToRenderList(void)
 	if (!m_bVisible)
 		return;
 	// Add an icosphere at a certain point of size m_fRadius
-	matrix4 m4Transform = glm::translate(m_v3Center) * glm::scale(vector3(m_fRadius));
+	matrix4 m4Transform = m_m4ToWorld * glm::translate(m_v3Center) * glm::scale(vector3(m_fRadius));
 	m_pMeshMngr->AddWireSphereToRenderList(m4Transform, m_v3Color);
+
+	m4Transform = m_m4ToWorld * glm::translate(m_v3Center) * glm::scale(m_v3HalfWidth);
+	m_pMeshMngr->AddWireCubeToRenderList(m4Transform, C_RED);
 }
 bool MyRigidBody::IsColliding(MyRigidBody* const other)
 {
