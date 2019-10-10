@@ -131,12 +131,11 @@ void Simplex::MyCamera::SetPositionTargetAndUpward(vector3 a_v3Position, vector3
 
 void Simplex::MyCamera::CalculateViewMatrix(void)
 {
+	// Set up the direction vectors (backup)
 	SetUpVector();
 	SetForwardVector();
 	SetRightVector();
-	//Calculate the look at most of your assignment will be reflected in this method
-	m_fYawAngle = glm::radians(m_fYawAngle);
-	m_fPitchAngle = glm::radians(m_fPitchAngle);
+	// Limit the angles being sent in
 	if (m_fPitchAngle > PI / 2.0f)
 		m_fPitchAngle = PI / 2.0f;
 	if(m_fPitchAngle < -PI / 2.0f)
@@ -148,32 +147,27 @@ void Simplex::MyCamera::CalculateViewMatrix(void)
 	// Yaw
 	if (m_fYawAngle != 0)
 	{
-		// Rotate Yaw
-		//quaternion qRotationYaw = glm::rotate(m_v3Upward, m_fYawAngle, m_v3Rightward);
+		// Yaw rotation
 		quaternion qRotationYaw = glm::angleAxis(m_fYawAngle, m_v3Upward);
-
-		// Apply changes
+		// Apply the rotation
 		m_v3Forward = qRotationYaw * m_v3Forward;
 		m_v3Target = m_v3Position + m_v3Forward;
 		m_v3Above = m_v3Position + m_v3Upward;
 	}
-
 	// Pitch
 	if (m_fPitchAngle != 0)
 	{
-		// Rotate Pitch
-		/*quaternion qRotationPitchZ = glm::rotate(m_v3Rightward, m_fPitchAngle, m_v3Forward);
-		quaternion qRotationPitchY = glm::rotate(m_v3Rightward, m_fPitchAngle, m_v3Upward);*/
+		// Pitch rotation
 		quaternion qRotationPitchZ = glm::rotate(m_fPitchAngle, m_v3Rightward);
 		quaternion qRotationPitchY = glm::rotate(m_fPitchAngle, m_v3Rightward);
-		// Apply the changes
+		// Apply the rotations
 		m_v3Forward = qRotationPitchZ * m_v3Forward;
 		m_v3Upward = qRotationPitchY * m_v3Upward;
 		m_v3Target = m_v3Position + m_v3Forward;
 		m_v3Above = m_v3Position + m_v3Upward;
 	}
-
-	m_m4View = glm::lookAt(m_v3Position, m_v3Target, m_v3Upward); //position, target, upward
+	// Set up the camera view
+	m_m4View = glm::lookAt(m_v3Position, m_v3Target, m_v3Upward); // position, target, upward
 }
 
 void Simplex::MyCamera::CalculateProjectionMatrix(void)
