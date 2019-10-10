@@ -132,38 +132,40 @@ void Simplex::MyCamera::SetPositionTargetAndUpward(vector3 a_v3Position, vector3
 void Simplex::MyCamera::CalculateViewMatrix(void)
 {
 	//Calculate the look at most of your assignment will be reflected in this method
-	if (m_fPitchAngle > PI / 2)
+	if (m_fPitchAngle >= PI / 2)
 		m_fPitchAngle = PI / 2;
-	if (m_fYawAngle > PI / 2)
+	if (m_fYawAngle >= PI / 2)
 		m_fYawAngle = PI / 2;
 	// Make the quaternion for m_v3Target
-	quaternion qTarget = glm::quat(GetForwardVector());
+	quaternion qTarget = glm::quat(m_v3Forward);
 	// Make the quaternion for m_v3Above
 	quaternion qAbove = glm::quat(m_v3Above);
 	// Yaw
 	if (m_fYawAngle != 0)
 	{
 		// Rotate Yaw
-		quaternion qRotationYaw = glm::rotate(qTarget, m_fYawAngle, m_v3Above);
+		//quaternion qRotationYaw = glm::rotate(qTarget, m_fYawAngle, m_v3Above);
+		quaternion qRotationYaw = glm::angleAxis(m_fYawAngle, m_v3Upward);
 		// Apply changes
-		m_v3Target += vector3(qRotationYaw.y, qRotationYaw.z, qRotationYaw.w);
+		m_v3Forward += vector3(qRotationYaw.y, qRotationYaw.z, qRotationYaw.w);
 	}
 
 	// Pitch
 	if (m_fPitchAngle != 0)
 	{
 		// Rotate Pitch
-		quaternion qRotationPitchZ = glm::rotate(qTarget, m_fPitchAngle, GetRightVector() + m_v3Position);
-		quaternion qRotationPitchY = glm::rotate(qAbove, m_fPitchAngle, GetRightVector() + m_v3Position);
-
+		//quaternion qRotationPitchZ = glm::rotate(qTarget, m_fPitchAngle, GetRightVector() + m_v3Position);
+		//quaternion qRotationPitchY = glm::rotate(qAbove, m_fPitchAngle, GetRightVector() + m_v3Position);
+		quaternion qRotationPitchZ = glm::angleAxis( m_fPitchAngle, m_v3Rightward);
+		quaternion qRotationPitchY = glm::angleAxis(m_fPitchAngle, m_v3Rightward);
 		// Apply the changes
 
-		m_v3Target += vector3(qRotationPitchZ.y, qRotationPitchZ.z, qRotationPitchZ.w);
-		m_v3Above += vector3(qRotationPitchY.y, qRotationPitchY.z, qRotationPitchY.w);
+		m_v3Forward += vector3(qRotationPitchZ.y, qRotationPitchZ.z, qRotationPitchZ.w);
+		m_v3Upward += vector3(qRotationPitchY.y, qRotationPitchY.z, qRotationPitchY.w);
 	}
 	
 
-	m_m4View = glm::lookAt(m_v3Position, m_v3Target, GetUpVector()); //position, target, upward
+	m_m4View = glm::lookAt(m_v3Position, m_v3Forward, m_v3Upward); //position, target, upward
 }
 
 void Simplex::MyCamera::CalculateProjectionMatrix(void)
@@ -184,30 +186,30 @@ void Simplex::MyCamera::CalculateProjectionMatrix(void)
 void MyCamera::MoveForward(float a_fDistance)
 {
 	// Forward vector
-	vector3 v3Forward = GetForwardVector();
+	SetForwardVector();
 
-	m_v3Position += v3Forward * a_fDistance;
-	m_v3Target += v3Forward * a_fDistance;
-	m_v3Above += v3Forward * a_fDistance;
+	m_v3Position += m_v3Forward * a_fDistance;
+	m_v3Target += m_v3Forward * a_fDistance;
+	m_v3Above += m_v3Forward * a_fDistance;
 }
 
 void MyCamera::MoveVertical(float a_fDistance)
 {
 	// Up vector
-	vector3 v3Up = GetUpVector();
+	SetUpVector();
 
-	m_v3Position += v3Up * a_fDistance;
-	m_v3Target += v3Up * a_fDistance;
-	m_v3Above += v3Up * a_fDistance;
+	m_v3Position += m_v3Upward * a_fDistance;
+	m_v3Target += m_v3Upward * a_fDistance;
+	m_v3Above += m_v3Upward * a_fDistance;
 }
 void MyCamera::MoveSideways(float a_fDistance)
 {
 	// Right vector
-	vector3 v3Right = GetRightVector();
+	SetRightVector();
 
-	m_v3Position += v3Right * a_fDistance;
-	m_v3Target += v3Right * a_fDistance;
-	m_v3Above += v3Right * a_fDistance;
+	m_v3Position += m_v3Rightward * a_fDistance;
+	m_v3Target += m_v3Rightward * a_fDistance;
+	m_v3Above += m_v3Rightward * a_fDistance;
 }
 
 void Simplex::MyCamera::ChangePitch(float a_fAngle)
@@ -220,17 +222,17 @@ void Simplex::MyCamera::ChangeYaw(float a_fAngle)
 	m_fYawAngle = a_fAngle;
 }
 
-vector3 Simplex::MyCamera::GetForwardVector()
+void Simplex::MyCamera::SetForwardVector()
 {
-	return glm::normalize(m_v3Target - m_v3Position);
+	m_v3Forward = glm::normalize(m_v3Target - m_v3Position);
 }
 
-vector3 Simplex::MyCamera::GetUpVector()
+void Simplex::MyCamera::SetUpVector()
 {
-	return glm::normalize(m_v3Above - m_v3Position);
+	m_v3Upward = glm::normalize(m_v3Above - m_v3Position);
 }
 
-vector3 Simplex::MyCamera::GetRightVector()
+void Simplex::MyCamera::SetRightVector()
 {
-	return glm::normalize(glm::cross(GetForwardVector(), GetUpVector()));
+	m_v3Rightward = glm::normalize(glm::cross(m_v3Forward, m_v3Upward));
 }

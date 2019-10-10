@@ -19,6 +19,10 @@ class MyCamera
 	vector3 m_v3Target = vector3(0.0f, 0.0f, 0.0f); //What I'm looking at
 	vector3 m_v3Above = vector3(0.0f, 1.0f, 0.0f); //What is above the camera
 
+	vector3 m_v3Forward = glm::normalize(m_v3Target - m_v3Position);
+	vector3 m_v3Upward = glm::normalize(m_v3Above - m_v3Position);;
+	vector3 m_v3Rightward = glm::normalize(glm::cross(m_v3Forward, m_v3Upward));;
+
 	bool m_bPerspective = true; //perspective view? False is Orthographic
 
 	float m_fFOV = 45.0f; //Field of View
@@ -246,9 +250,9 @@ public:
 	*/
 	void ChangeYaw(float a_fAngle);
 
-	vector3 GetForwardVector();
-	vector3 GetUpVector();
-	vector3 GetRightVector();
+	void SetForwardVector();
+	void SetUpVector();
+	void SetRightVector();
 };
 
 } //namespace Simplex
