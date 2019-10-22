@@ -11,11 +11,19 @@ Date: 2017/05
 #include "imgui\ImGuiObject.h"
 
 #include "MyRigidBody.h"
+#include "MyEntity.h"
+
 namespace Simplex
 {
 
 class Application
 {
+	// since we want to use MyEntity here, we needed to include the header for it. Then we made a pointer to our MyEntity singleton here.
+	MyEntity* m_pEntity1 = nullptr;
+	MyMeshManager* m_pMyMeshMngr = nullptr;
+
+	MyCamera* m_pCamera = nullptr;
+
 	vector3 m_v3Creeper; //position of the creeper
 	quaternion m_qCreeper; //quaternion for the creeper
 

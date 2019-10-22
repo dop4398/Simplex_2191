@@ -152,19 +152,19 @@ void Simplex::MyCamera::CalculateViewMatrix(void)
 		// Apply the rotation
 		m_v3Forward = qRotationYaw * m_v3Forward;
 		m_v3Target = m_v3Position + m_v3Forward;
-		m_v3Above = m_v3Position + m_v3Upward;
+		//m_v3Above = m_v3Position + m_v3Upward;
 	}
 	// Pitch
 	if (m_fPitchAngle != 0)
 	{
 		// Pitch rotation
 		quaternion qRotationPitchZ = glm::rotate(m_fPitchAngle, m_v3Rightward);
-		quaternion qRotationPitchY = glm::rotate(m_fPitchAngle, m_v3Rightward);
+		//quaternion qRotationPitchY = glm::rotate(m_fPitchAngle, m_v3Rightward);
 		// Apply the rotations
 		m_v3Forward = qRotationPitchZ * m_v3Forward;
-		m_v3Upward = qRotationPitchY * m_v3Upward;
+		//m_v3Upward = qRotationPitchY * m_v3Upward;
 		m_v3Target = m_v3Position + m_v3Forward;
-		m_v3Above = m_v3Position + m_v3Upward;
+		//m_v3Above = m_v3Position + m_v3Upward;
 	}
 	// Set up the camera view
 	m_m4View = glm::lookAt(m_v3Position, m_v3Target, m_v3Upward); // position, target, upward
