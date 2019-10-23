@@ -399,6 +399,27 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	fOtherRadius = (eOther[0] * AbsR[1][2]) + (eOther[2] * AbsR[1][0]);
 	if (abs(t[0] * R[2][1] - t[2] * R[0][1]) < fThisRadius + fOtherRadius)
 		return eSATResults::SAT_AYxBX;
+	// Test axis L = A1 x B2
+	fThisRadius = (eThis[0] * AbsR[2][2]) + (eThis[2] * AbsR[0][2]);
+	fOtherRadius = (eOther[0] * AbsR[1][1]) + (eOther[1] * AbsR[1][0]);
+	if (abs(t[0] * R[2][2] - t[2] * R[0][2]) < fThisRadius + fOtherRadius)
+		return eSATResults::SAT_AYxBZ;
+
+	// Test axis L = A2 x B0
+	fThisRadius = (eThis[0] * AbsR[1][0]) + (eThis[1] * AbsR[0][0]);
+	fOtherRadius = (eOther[1] * AbsR[2][2]) + (eOther[2] * AbsR[2][1]);
+	if (abs(t[1] * R[0][0] - t[0] * R[1][0]) < fThisRadius + fOtherRadius)
+		return eSATResults::SAT_AZxBX;
+	// Test axis L = A2 x B1
+	fThisRadius = (eThis[0] * AbsR[1][1]) + (eThis[1] * AbsR[0][1]);
+	fOtherRadius = (eOther[0] * AbsR[2][2]) + (eOther[2] * AbsR[2][0]);
+	if (abs(t[1] * R[0][1] - t[0] * R[1][1]) < fThisRadius + fOtherRadius)
+		return eSATResults::SAT_AZxBY;
+	// Test axis L = A2 x B2
+	fThisRadius = (eThis[0] * AbsR[1][2]) + (eThis[1] * AbsR[0][2]);
+	fOtherRadius = (eOther[0] * AbsR[2][1]) + (eOther[1] * AbsR[2][0]);
+	if (abs(t[1] * R[0][2] - t[0] * R[1][2]) < fThisRadius + fOtherRadius)
+		return eSATResults::SAT_AZxBZ;
 
 	//there is no axis test that separates this two objects
 	return eSATResults::SAT_NONE;
