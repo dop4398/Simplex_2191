@@ -297,23 +297,22 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	u[3] = local x-, y-, and z- axes (vector3[3])
 	a = this
 	b = a_pOther
-	c = GetCenterGlobal?Local?
+	c = GetCenterGlobal
 	e = positive GetHalfWidth() extents of OBB along each axis
 	*/
 	
 	matrix3 R, AbsR;
-	float ra;
-	float rb;
+	float ra, rb;
 	// Set up 'u's and 'e's ******************************************************************************************************
 	vector3 uA[3] = {
-		vector3(this->GetModelMatrix()[0]) /** this->GetModelMatrix()[0][3]*/,
-		vector3(this->GetModelMatrix()[1]) /** this->GetModelMatrix()[1][3]*/,
-		vector3(this->GetModelMatrix()[2]) /** this->GetModelMatrix()[2][3]*/
+		vector3(this->GetModelMatrix()[0]),
+		vector3(this->GetModelMatrix()[1]),
+		vector3(this->GetModelMatrix()[2])
 	};
 	vector3 uB[3] = {
-		vector3(a_pOther->GetModelMatrix()[0]) * a_pOther->GetModelMatrix()[0][3],
-		vector3(a_pOther->GetModelMatrix()[1]) * a_pOther->GetModelMatrix()[1][3],
-		vector3(a_pOther->GetModelMatrix()[2]) * a_pOther->GetModelMatrix()[2][3]
+		vector3(a_pOther->GetModelMatrix()[0]),
+		vector3(a_pOther->GetModelMatrix()[1]),
+		vector3(a_pOther->GetModelMatrix()[2])
 	};
 	float eA[3] = {
 		this->GetHalfWidth().x,
@@ -335,7 +334,7 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 		}
 	}
 	// Compute the translation vector t
-	vector3 t = glm::abs(a_pOther->GetCenterLocal() - this->GetCenterLocal());
+	vector3 t = glm::abs(a_pOther->GetCenterGlobal() - this->GetCenterGlobal());
 	// Begin the translation into a's coordinate frame
 	t = vector3(glm::dot(t, uA[0]), glm::dot(t, uA[1]), glm::dot(t, uA[2]));
 
@@ -344,7 +343,7 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	{
 		for (int j = 0; j < 3; j++)
 		{
-			AbsR[i][j] = glm::abs(R[i][j]) + DBL_EPSILON;
+			AbsR[i][j] = glm::abs(R[i][j]) + FLT_EPSILON;
 		}
 	}
 
@@ -353,24 +352,68 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	{
 		ra = this->GetHalfWidth()[i];
 		rb = (eB[0] * AbsR[i][0]) + (eB[1] * AbsR[i][1]) + eB[2];
-		if (glm::abs(t[i]) > ra + rb && i == 0)
-			return eSATResults::SAT_AX;
-		else if(glm::abs(t[i]) > ra + rb && i == 1)
-			return eSATResults::SAT_AY;
-		else if (glm::abs(t[i]) > ra + rb && i == 2)
-			return eSATResults::SAT_AZ;
+		if (glm::abs(t[i]) > ra + rb)
+		{
+			// Different axis depending on i
+			switch (i)
+			{
+			case 0:			
+				m_pMeshMngr->AddPlaneToRenderList(
+					this->GetModelMatrix() - (this->GetModelMatrix() - a_pOther->GetModelMatrix()) / 2,
+					C_YELLOW, 
+					1);
+				return eSATResults::SAT_AX;
+				break;
+			case 1:
+				m_pMeshMngr->AddPlaneToRenderList(
+					this->GetModelMatrix() - (this->GetModelMatrix() - a_pOther->GetModelMatrix()) / 2,
+					C_YELLOW,
+					1);
+				return eSATResults::SAT_AY;
+				break;
+			default:
+				m_pMeshMngr->AddPlaneToRenderList(
+					this->GetModelMatrix() - (this->GetModelMatrix() - a_pOther->GetModelMatrix()) / 2,
+					C_YELLOW,
+					1);
+				return eSATResults::SAT_AZ;
+				break;
+			}
+		}
 	}
 	// Test axes L = B0, L = B1, L = B2
 	for (int i = 0; i < 3; i++)
 	{
 		rb = a_pOther->GetHalfWidth()[i];
 		ra = (eA[0] * AbsR[0][i]) + (eA[1] * AbsR[1][i]) + eA[2];
-		if (glm::abs(t[0] * R[0][i] + t[1] * R[1][i] + t[2] * R[2][i]) > ra + rb && i == 0)
-			return eSATResults::SAT_BX;
-		if (glm::abs(t[0] * R[0][i] + t[1] * R[1][i] + t[2] * R[2][i]) > ra + rb && i == 1)
-			return eSATResults::SAT_BY;
-		if (glm::abs(t[0] * R[0][i] + t[1] * R[1][i] + t[2] * R[2][i]) > ra + rb && i == 2)
-			return eSATResults::SAT_BZ;
+		if (glm::abs(t[0] * R[0][i] + t[1] * R[1][i] + t[2] * R[2][i]) > ra + rb)
+		{
+			// Different axis depending on i
+			switch (i)
+			{
+			case 0:
+				m_pMeshMngr->AddPlaneToRenderList(
+					this->GetModelMatrix() - (this->GetModelMatrix() - a_pOther->GetModelMatrix()) / 2,
+					C_YELLOW,
+					1);
+				return eSATResults::SAT_BX;
+				break;
+			case 1:
+				m_pMeshMngr->AddPlaneToRenderList(
+					this->GetModelMatrix() - (this->GetModelMatrix() - a_pOther->GetModelMatrix()) / 2,
+					C_YELLOW,
+					1);
+				return eSATResults::SAT_BY;
+				break;
+			default:
+				m_pMeshMngr->AddPlaneToRenderList(
+					this->GetModelMatrix() - (this->GetModelMatrix() - a_pOther->GetModelMatrix()) / 2,
+					C_YELLOW,
+					1);
+				return eSATResults::SAT_BZ;
+				break;
+			}
+		}		
 	}
 
 	// Test axis L = A0 x B0
