@@ -306,9 +306,9 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	float fOtherRadius;
 	// Set up 'u's and 'e's ******************************************************************************************************
 	vector3 uThis[3] = {
-		vector3(this->GetModelMatrix()[0]) * this->GetModelMatrix()[0][3],
-		vector3(this->GetModelMatrix()[1]) * this->GetModelMatrix()[1][3],
-		vector3(this->GetModelMatrix()[2]) * this->GetModelMatrix()[2][3]
+		vector3(this->GetModelMatrix()[0]) /** this->GetModelMatrix()[0][3]*/,
+		vector3(this->GetModelMatrix()[1]) /** this->GetModelMatrix()[1][3]*/,
+		vector3(this->GetModelMatrix()[2]) /** this->GetModelMatrix()[2][3]*/
 	};
 	vector3 uOther[3] = {
 		vector3(a_pOther->GetModelMatrix()[0]) * a_pOther->GetModelMatrix()[0][3],
@@ -348,10 +348,11 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 			AbsR[i][j] = abs(R[i][j]) + DBL_EPSILON;
 		}
 	}
+
 	// Test axes L = A0, L = A1, L = A2
 	for (int i = 0; i < 3; i++)
 	{
-		fThisRadius = this->GetHalfWidth[i];
+		fThisRadius = this->GetHalfWidth()[i];
 		fOtherRadius = (eOther[0] * AbsR[i][0]) + (eOther[1] * AbsR[i][1]) + eOther[2];
 		if (abs(t[i]) < fThisRadius + fOtherRadius && i == 0)												// ** change sign
 			return eSATResults::SAT_AX;
@@ -363,7 +364,7 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	// Test axes L = B0, L = B1, L = B2
 	for (int i = 0; i < 3; i++)
 	{
-		fOtherRadius = a_pOther->GetHalfWidth[i];
+		fOtherRadius = a_pOther->GetHalfWidth()[i];
 		fThisRadius = (eThis[0] * AbsR[0][i]) + (eThis[1] * AbsR[1][i]) + eThis[2];
 		if (abs(t[0] * R[0][i] + t[1] * R[1][i] + t[2] * R[2][i]) < fThisRadius + fOtherRadius && i == 0)	// ** change sign
 			return eSATResults::SAT_BX;
@@ -374,7 +375,7 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	}
 
 	// Test axis L = A0 x B0
-	fThisRadius = (eThis[1] * AbsR[2][0]) + (eThis[2] * AbsR[1][0]);
+	fThisRadius = (eThis[1] * AbsR[2][0]) +  (eThis[2] * AbsR[1][0]);
 	fOtherRadius = (eOther[1] * AbsR[0][2]) + (eOther[2] * AbsR[0][1]);
 	if (abs(t[2] * R[1][0] - t[1] * R[2][0]) < fThisRadius + fOtherRadius)
 		return eSATResults::SAT_AXxBX;
@@ -384,7 +385,7 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	if (abs(t[2] * R[1][1] - t[1] * R[2][1]) < fThisRadius + fOtherRadius)
 		return eSATResults::SAT_AXxBY;
 	// Test axis L = A0 x B2
-	fThisRadius = (eThis[1] * AbsR[2][2]) + (eThis[2] * AbsR[1][1]);
+	fThisRadius = (eThis[1] * AbsR[2][2]) + (eThis[2] * AbsR[1][2]);
 	fOtherRadius = (eOther[0] * AbsR[0][1]) + (eOther[1] * AbsR[0][0]);
 	if (abs(t[2] * R[1][2] - t[1] * R[2][2]) < fThisRadius + fOtherRadius)
 		return eSATResults::SAT_AXxBZ;
