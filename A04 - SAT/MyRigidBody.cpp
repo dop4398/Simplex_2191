@@ -286,6 +286,43 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	Simplex that might help you [eSATResults] feel free to use it.
 	(eSATResults::SAT_NONE has a value of 0)
 	*/
+	
+	// T = |v3CenterA - v3CenterB| (distance between centers)
+	// L = axis we are testing
+	// Two OBBs are separate if:  |T . L| > radA + radB
+
+	/*
+	ra = this.GetRadius()
+	rb = a_pOther.GetRadius()
+	u[3] = local x-, y-, and z- axes (vector3[3])
+	a = this
+	b = a_pOther
+	c = GetCenterGlobal?Local?
+	e = positive GetHalfWidth() extents of OBB along each axis
+	*/
+	
+	matrix3 R, AbsR;
+	// Set up 'u's and 'e's
+	vector3 uThis[3] = {
+		vector3(this->GetCenterLocal().x + this->GetHalfWidth().x, this->GetCenterLocal().y, this->GetCenterLocal().z), // x
+		vector3(this->GetCenterLocal().x, this->GetCenterLocal().y + this->GetHalfWidth().y, this->GetCenterLocal().z), // y
+		vector3(this->GetCenterLocal().x, this->GetCenterLocal().y, this->GetCenterLocal().z + this->GetHalfWidth().z), // z
+	};
+	vector3 uOther[3] = {
+		vector3(a_pOther->GetCenterLocal().x + this->GetHalfWidth().x, a_pOther->GetCenterLocal().y, a_pOther->GetCenterLocal().z), // x
+		vector3(a_pOther->GetCenterLocal().x, a_pOther->GetCenterLocal().y + this->GetHalfWidth().y, a_pOther->GetCenterLocal().z), // y
+		vector3(a_pOther->GetCenterLocal().x, a_pOther->GetCenterLocal().y, a_pOther->GetCenterLocal().z + this->GetHalfWidth().z), // z
+	};
+
+
+	// Compute the rotation matrix expressing a_pOther in this MyRigidBody's coordinate frame
+	for (int i = 0; i < 3; i++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			R[i][j] = glm::cross(uThis[i], uOther[j]);
+		}
+	}
 
 	//there is no axis test that separates this two objects
 	return eSATResults::SAT_NONE;

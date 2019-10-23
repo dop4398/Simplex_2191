@@ -1,6 +1,9 @@
 /*----------------------------------------------
 Programmer: Alberto Bobadilla (labigm@gmail.com)
 Date: 2017/06
+
+Assignment 04 - SAT
+Programmer: David Patch
 ----------------------------------------------*/
 #ifndef __MYRIGIDBODY_H_
 #define __MYRIGIDBODY_H_
