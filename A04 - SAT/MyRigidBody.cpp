@@ -302,16 +302,28 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	*/
 	
 	matrix3 R, AbsR;
+	float fThisRadius;
+	float fOtherRadius;
 	// Set up 'u's and 'e's ******************************************************************************************************
 	vector3 uThis[3] = {
-		vector3(this->GetModelMatrix()[0]) * this->GetHalfWidth().x,
-		vector3(this->GetModelMatrix()[1]) * this->GetHalfWidth().y,
-		vector3(this->GetModelMatrix()[2]) * this->GetHalfWidth().z
+		vector3(this->GetModelMatrix()[0]) * this->GetModelMatrix()[0][3],
+		vector3(this->GetModelMatrix()[1]) * this->GetModelMatrix()[1][3],
+		vector3(this->GetModelMatrix()[2]) * this->GetModelMatrix()[2][3]
 	};
 	vector3 uOther[3] = {
-		vector3(a_pOther->GetModelMatrix()[0]) * a_pOther->GetHalfWidth().x,
-		vector3(a_pOther->GetModelMatrix()[1]) * a_pOther->GetHalfWidth().y,
-		vector3(a_pOther->GetModelMatrix()[2]) * a_pOther->GetHalfWidth().z
+		vector3(a_pOther->GetModelMatrix()[0]) * a_pOther->GetModelMatrix()[0][3],
+		vector3(a_pOther->GetModelMatrix()[1]) * a_pOther->GetModelMatrix()[1][3],
+		vector3(a_pOther->GetModelMatrix()[2]) * a_pOther->GetModelMatrix()[2][3]
+	};
+	float eThis[3] = {
+		this->GetHalfWidth().x,
+		this->GetHalfWidth().y,
+		this->GetHalfWidth().z
+	};
+	float eOther[3] = {
+		a_pOther->GetHalfWidth().x,
+		a_pOther->GetHalfWidth().y,
+		a_pOther->GetHalfWidth().z
 	};
 
 
@@ -339,8 +351,55 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	// Test axes L = A0, L = A1, L = A2
 	for (int i = 0; i < 3; i++)
 	{
-		this->GetRadius = 
+		fThisRadius = this->GetHalfWidth[i];
+		fOtherRadius = (eOther[0] * AbsR[i][0]) + (eOther[1] * AbsR[i][1]) + eOther[2];
+		if (abs(t[i]) < fThisRadius + fOtherRadius && i == 0)												// ** change sign
+			return eSATResults::SAT_AX;
+		else if(abs(t[i]) < fThisRadius + fOtherRadius && i == 1)
+			return eSATResults::SAT_AY;
+		else if (abs(t[i]) < fThisRadius + fOtherRadius && i == 2)
+			return eSATResults::SAT_AZ;
 	}
+	// Test axes L = B0, L = B1, L = B2
+	for (int i = 0; i < 3; i++)
+	{
+		fOtherRadius = a_pOther->GetHalfWidth[i];
+		fThisRadius = (eThis[0] * AbsR[0][i]) + (eThis[1] * AbsR[1][i]) + eThis[2];
+		if (abs(t[0] * R[0][i] + t[1] * R[1][i] + t[2] * R[2][i]) < fThisRadius + fOtherRadius && i == 0)	// ** change sign
+			return eSATResults::SAT_BX;
+		if (abs(t[0] * R[0][i] + t[1] * R[1][i] + t[2] * R[2][i]) < fThisRadius + fOtherRadius && i == 1)	// ** change sign
+			return eSATResults::SAT_BY;
+		if (abs(t[0] * R[0][i] + t[1] * R[1][i] + t[2] * R[2][i]) < fThisRadius + fOtherRadius && i == 2)	// ** change sign
+			return eSATResults::SAT_BZ;
+	}
+
+	// Test axis L = A0 x B0
+	fThisRadius = (eThis[1] * AbsR[2][0]) + (eThis[2] * AbsR[1][0]);
+	fOtherRadius = (eOther[1] * AbsR[0][2]) + (eOther[2] * AbsR[0][1]);
+	if (abs(t[2] * R[1][0] - t[1] * R[2][0]) < fThisRadius + fOtherRadius)
+		return eSATResults::SAT_AXxBX;
+	// Test axis L = A0 x B1
+	fThisRadius = (eThis[1] * AbsR[2][1]) + (eThis[2] * AbsR[1][1]);
+	fOtherRadius = (eOther[0] * AbsR[0][2]) + (eOther[2] * AbsR[0][0]);
+	if (abs(t[2] * R[1][1] - t[1] * R[2][1]) < fThisRadius + fOtherRadius)
+		return eSATResults::SAT_AXxBY;
+	// Test axis L = A0 x B2
+	fThisRadius = (eThis[1] * AbsR[2][2]) + (eThis[2] * AbsR[1][1]);
+	fOtherRadius = (eOther[0] * AbsR[0][1]) + (eOther[1] * AbsR[0][0]);
+	if (abs(t[2] * R[1][2] - t[1] * R[2][2]) < fThisRadius + fOtherRadius)
+		return eSATResults::SAT_AXxBZ;
+
+	// Test axis L = A1 x B0
+	fThisRadius = (eThis[0] * AbsR[2][0]) + (eThis[2] * AbsR[0][0]);
+	fOtherRadius = (eOther[1] * AbsR[1][2]) + (eOther[2] * AbsR[1][1]);
+	if (abs(t[0] * R[2][0] - t[2] * R[0][0]) < fThisRadius + fOtherRadius)
+		return eSATResults::SAT_AYxBX;
+	// Test axis L = A1 x B1
+	fThisRadius = (eThis[0] * AbsR[2][1]) + (eThis[2] * AbsR[0][1]);
+	fOtherRadius = (eOther[0] * AbsR[1][2]) + (eOther[2] * AbsR[1][0]);
+	if (abs(t[0] * R[2][1] - t[2] * R[0][1]) < fThisRadius + fOtherRadius)
+		return eSATResults::SAT_AYxBX;
+
 	//there is no axis test that separates this two objects
 	return eSATResults::SAT_NONE;
 }
