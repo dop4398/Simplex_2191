@@ -302,16 +302,16 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	*/
 	
 	matrix3 R, AbsR;
-	// Set up 'u's and 'e's
+	// Set up 'u's and 'e's ******************************************************************************************************
 	vector3 uThis[3] = {
-		vector3(this->GetCenterLocal().x + this->GetHalfWidth().x, this->GetCenterLocal().y, this->GetCenterLocal().z), // x
-		vector3(this->GetCenterLocal().x, this->GetCenterLocal().y + this->GetHalfWidth().y, this->GetCenterLocal().z), // y
-		vector3(this->GetCenterLocal().x, this->GetCenterLocal().y, this->GetCenterLocal().z + this->GetHalfWidth().z), // z
+		vector3(this->GetModelMatrix()[0]) * this->GetHalfWidth().x,
+		vector3(this->GetModelMatrix()[1]) * this->GetHalfWidth().y,
+		vector3(this->GetModelMatrix()[2]) * this->GetHalfWidth().z
 	};
 	vector3 uOther[3] = {
-		vector3(a_pOther->GetCenterLocal().x + this->GetHalfWidth().x, a_pOther->GetCenterLocal().y, a_pOther->GetCenterLocal().z), // x
-		vector3(a_pOther->GetCenterLocal().x, a_pOther->GetCenterLocal().y + this->GetHalfWidth().y, a_pOther->GetCenterLocal().z), // y
-		vector3(a_pOther->GetCenterLocal().x, a_pOther->GetCenterLocal().y, a_pOther->GetCenterLocal().z + this->GetHalfWidth().z), // z
+		vector3(a_pOther->GetModelMatrix()[0]) * a_pOther->GetHalfWidth().x,
+		vector3(a_pOther->GetModelMatrix()[1]) * a_pOther->GetHalfWidth().y,
+		vector3(a_pOther->GetModelMatrix()[2]) * a_pOther->GetHalfWidth().z
 	};
 
 
@@ -320,10 +320,27 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	{
 		for (int j = 0; j < 3; j++)
 		{
-			R[i][j] = glm::cross(uThis[i], uOther[j]);
+			R[i][j] = glm::dot(uThis[i], uOther[j]);
 		}
 	}
+	// Compute the translation vector t
+	vector3 t = a_pOther->GetCenterGlobal() - this->GetCenterGlobal();
+	// Begin the translation into a's coordinate frame
+	t = vector3(glm::dot(t, uThis[0]), glm::dot(t, uThis[1]), glm::dot(t, uThis[2]));
 
+	// Compute common subexpressions. Add in an epsilon term to counteract arithmetic errors when two edges ar eparallel and their cross product is (near) null
+	for (int i = 0; i < 3; i++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			AbsR[i][j] = abs(R[i][j]) + DBL_EPSILON;
+		}
+	}
+	// Test axes L = A0, L = A1, L = A2
+	for (int i = 0; i < 3; i++)
+	{
+		this->GetRadius = 
+	}
 	//there is no axis test that separates this two objects
 	return eSATResults::SAT_NONE;
 }
