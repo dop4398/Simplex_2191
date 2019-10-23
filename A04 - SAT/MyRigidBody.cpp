@@ -302,25 +302,25 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	*/
 	
 	matrix3 R, AbsR;
-	float fThisRadius;
-	float fOtherRadius;
+	float ra;
+	float rb;
 	// Set up 'u's and 'e's ******************************************************************************************************
-	vector3 uThis[3] = {
+	vector3 uA[3] = {
 		vector3(this->GetModelMatrix()[0]) /** this->GetModelMatrix()[0][3]*/,
 		vector3(this->GetModelMatrix()[1]) /** this->GetModelMatrix()[1][3]*/,
 		vector3(this->GetModelMatrix()[2]) /** this->GetModelMatrix()[2][3]*/
 	};
-	vector3 uOther[3] = {
+	vector3 uB[3] = {
 		vector3(a_pOther->GetModelMatrix()[0]) * a_pOther->GetModelMatrix()[0][3],
 		vector3(a_pOther->GetModelMatrix()[1]) * a_pOther->GetModelMatrix()[1][3],
 		vector3(a_pOther->GetModelMatrix()[2]) * a_pOther->GetModelMatrix()[2][3]
 	};
-	float eThis[3] = {
+	float eA[3] = {
 		this->GetHalfWidth().x,
 		this->GetHalfWidth().y,
 		this->GetHalfWidth().z
 	};
-	float eOther[3] = {
+	float eB[3] = {
 		a_pOther->GetHalfWidth().x,
 		a_pOther->GetHalfWidth().y,
 		a_pOther->GetHalfWidth().z
@@ -332,94 +332,94 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	{
 		for (int j = 0; j < 3; j++)
 		{
-			R[i][j] = glm::dot(uThis[i], uOther[j]);
+			R[i][j] = glm::dot(uA[i], uB[j]);
 		}
 	}
 	// Compute the translation vector t
-	vector3 t = a_pOther->GetCenterGlobal() - this->GetCenterGlobal();
+	vector3 t = glm::abs(a_pOther->GetCenterGlobal() - this->GetCenterGlobal());
 	// Begin the translation into a's coordinate frame
-	t = vector3(glm::dot(t, uThis[0]), glm::dot(t, uThis[1]), glm::dot(t, uThis[2]));
+	t = vector3(glm::dot(t, uA[0]), glm::dot(t, uA[1]), glm::dot(t, uA[2]));
 
 	// Compute common subexpressions. Add in an epsilon term to counteract arithmetic errors when two edges ar eparallel and their cross product is (near) null
 	for (int i = 0; i < 3; i++)
 	{
 		for (int j = 0; j < 3; j++)
 		{
-			AbsR[i][j] = abs(R[i][j]) + DBL_EPSILON;
+			AbsR[i][j] = glm::abs(R[i][j]) + DBL_EPSILON;
 		}
 	}
 
 	// Test axes L = A0, L = A1, L = A2
 	for (int i = 0; i < 3; i++)
 	{
-		fThisRadius = this->GetHalfWidth()[i];
-		fOtherRadius = (eOther[0] * AbsR[i][0]) + (eOther[1] * AbsR[i][1]) + eOther[2];
-		if (abs(t[i]) < fThisRadius + fOtherRadius && i == 0)												// ** change sign
+		ra = this->GetHalfWidth()[i];
+		rb = (eB[0] * AbsR[i][0]) + (eB[1] * AbsR[i][1]) + eB[2];
+		if (glm::abs(t[i]) < ra + rb && i == 0)												// ** change sign
 			return eSATResults::SAT_AX;
-		else if(abs(t[i]) < fThisRadius + fOtherRadius && i == 1)
+		else if(glm::abs(t[i]) < ra + rb && i == 1)
 			return eSATResults::SAT_AY;
-		else if (abs(t[i]) < fThisRadius + fOtherRadius && i == 2)
+		else if (glm::abs(t[i]) < ra + rb && i == 2)
 			return eSATResults::SAT_AZ;
 	}
 	// Test axes L = B0, L = B1, L = B2
 	for (int i = 0; i < 3; i++)
 	{
-		fOtherRadius = a_pOther->GetHalfWidth()[i];
-		fThisRadius = (eThis[0] * AbsR[0][i]) + (eThis[1] * AbsR[1][i]) + eThis[2];
-		if (abs(t[0] * R[0][i] + t[1] * R[1][i] + t[2] * R[2][i]) < fThisRadius + fOtherRadius && i == 0)	// ** change sign
+		rb = a_pOther->GetHalfWidth()[i];
+		ra = (eA[0] * AbsR[0][i]) + (eA[1] * AbsR[1][i]) + eA[2];
+		if (glm::abs(t[0] * R[0][i] + t[1] * R[1][i] + t[2] * R[2][i]) < ra + rb && i == 0)	// ** change sign
 			return eSATResults::SAT_BX;
-		if (abs(t[0] * R[0][i] + t[1] * R[1][i] + t[2] * R[2][i]) < fThisRadius + fOtherRadius && i == 1)	// ** change sign
+		if (glm::abs(t[0] * R[0][i] + t[1] * R[1][i] + t[2] * R[2][i]) < ra + rb && i == 1)	// ** change sign
 			return eSATResults::SAT_BY;
-		if (abs(t[0] * R[0][i] + t[1] * R[1][i] + t[2] * R[2][i]) < fThisRadius + fOtherRadius && i == 2)	// ** change sign
+		if (glm::abs(t[0] * R[0][i] + t[1] * R[1][i] + t[2] * R[2][i]) < ra + rb && i == 2)	// ** change sign
 			return eSATResults::SAT_BZ;
 	}
 
 	// Test axis L = A0 x B0
-	fThisRadius = (eThis[1] * AbsR[2][0]) +  (eThis[2] * AbsR[1][0]);
-	fOtherRadius = (eOther[1] * AbsR[0][2]) + (eOther[2] * AbsR[0][1]);
-	if (abs(t[2] * R[1][0] - t[1] * R[2][0]) < fThisRadius + fOtherRadius)
+	ra = (eA[1] * AbsR[2][0]) +  (eA[2] * AbsR[1][0]);
+	rb = (eB[1] * AbsR[0][2]) + (eB[2] * AbsR[0][1]);
+	if (glm::abs(t[2] * R[1][0] - t[1] * R[2][0]) < ra + rb)
 		return eSATResults::SAT_AXxBX;
 	// Test axis L = A0 x B1
-	fThisRadius = (eThis[1] * AbsR[2][1]) + (eThis[2] * AbsR[1][1]);
-	fOtherRadius = (eOther[0] * AbsR[0][2]) + (eOther[2] * AbsR[0][0]);
-	if (abs(t[2] * R[1][1] - t[1] * R[2][1]) < fThisRadius + fOtherRadius)
+	ra = (eA[1] * AbsR[2][1]) + (eA[2] * AbsR[1][1]);
+	rb = (eB[0] * AbsR[0][2]) + (eB[2] * AbsR[0][0]);
+	if (glm::abs(t[2] * R[1][1] - t[1] * R[2][1]) < ra + rb)
 		return eSATResults::SAT_AXxBY;
 	// Test axis L = A0 x B2
-	fThisRadius = (eThis[1] * AbsR[2][2]) + (eThis[2] * AbsR[1][2]);
-	fOtherRadius = (eOther[0] * AbsR[0][1]) + (eOther[1] * AbsR[0][0]);
-	if (abs(t[2] * R[1][2] - t[1] * R[2][2]) < fThisRadius + fOtherRadius)
+	ra = (eA[1] * AbsR[2][2]) + (eA[2] * AbsR[1][2]);
+	rb = (eB[0] * AbsR[0][1]) + (eB[1] * AbsR[0][0]);
+	if (glm::abs(t[2] * R[1][2] - t[1] * R[2][2]) < ra + rb)
 		return eSATResults::SAT_AXxBZ;
 
 	// Test axis L = A1 x B0
-	fThisRadius = (eThis[0] * AbsR[2][0]) + (eThis[2] * AbsR[0][0]);
-	fOtherRadius = (eOther[1] * AbsR[1][2]) + (eOther[2] * AbsR[1][1]);
-	if (abs(t[0] * R[2][0] - t[2] * R[0][0]) < fThisRadius + fOtherRadius)
+	ra = (eA[0] * AbsR[2][0]) + (eA[2] * AbsR[0][0]);
+	rb = (eB[1] * AbsR[1][2]) + (eB[2] * AbsR[1][1]);
+	if (glm::abs(t[0] * R[2][0] - t[2] * R[0][0]) < ra + rb)
 		return eSATResults::SAT_AYxBX;
 	// Test axis L = A1 x B1
-	fThisRadius = (eThis[0] * AbsR[2][1]) + (eThis[2] * AbsR[0][1]);
-	fOtherRadius = (eOther[0] * AbsR[1][2]) + (eOther[2] * AbsR[1][0]);
-	if (abs(t[0] * R[2][1] - t[2] * R[0][1]) < fThisRadius + fOtherRadius)
+	ra = (eA[0] * AbsR[2][1]) + (eA[2] * AbsR[0][1]);
+	rb = (eB[0] * AbsR[1][2]) + (eB[2] * AbsR[1][0]);
+	if (glm::abs(t[0] * R[2][1] - t[2] * R[0][1]) < ra + rb)
 		return eSATResults::SAT_AYxBX;
 	// Test axis L = A1 x B2
-	fThisRadius = (eThis[0] * AbsR[2][2]) + (eThis[2] * AbsR[0][2]);
-	fOtherRadius = (eOther[0] * AbsR[1][1]) + (eOther[1] * AbsR[1][0]);
-	if (abs(t[0] * R[2][2] - t[2] * R[0][2]) < fThisRadius + fOtherRadius)
+	ra = (eA[0] * AbsR[2][2]) + (eA[2] * AbsR[0][2]);
+	rb = (eB[0] * AbsR[1][1]) + (eB[1] * AbsR[1][0]);
+	if (glm::abs(t[0] * R[2][2] - t[2] * R[0][2]) < ra + rb)
 		return eSATResults::SAT_AYxBZ;
 
 	// Test axis L = A2 x B0
-	fThisRadius = (eThis[0] * AbsR[1][0]) + (eThis[1] * AbsR[0][0]);
-	fOtherRadius = (eOther[1] * AbsR[2][2]) + (eOther[2] * AbsR[2][1]);
-	if (abs(t[1] * R[0][0] - t[0] * R[1][0]) < fThisRadius + fOtherRadius)
+	ra = (eA[0] * AbsR[1][0]) + (eA[1] * AbsR[0][0]);
+	rb = (eB[1] * AbsR[2][2]) + (eB[2] * AbsR[2][1]);
+	if (glm::abs(t[1] * R[0][0] - t[0] * R[1][0]) < ra + rb)
 		return eSATResults::SAT_AZxBX;
 	// Test axis L = A2 x B1
-	fThisRadius = (eThis[0] * AbsR[1][1]) + (eThis[1] * AbsR[0][1]);
-	fOtherRadius = (eOther[0] * AbsR[2][2]) + (eOther[2] * AbsR[2][0]);
-	if (abs(t[1] * R[0][1] - t[0] * R[1][1]) < fThisRadius + fOtherRadius)
+	ra = (eA[0] * AbsR[1][1]) + (eA[1] * AbsR[0][1]);
+	rb = (eB[0] * AbsR[2][2]) + (eB[2] * AbsR[2][0]);
+	if (glm::abs(t[1] * R[0][1] - t[0] * R[1][1]) < ra + rb)
 		return eSATResults::SAT_AZxBY;
 	// Test axis L = A2 x B2
-	fThisRadius = (eThis[0] * AbsR[1][2]) + (eThis[1] * AbsR[0][2]);
-	fOtherRadius = (eOther[0] * AbsR[2][1]) + (eOther[1] * AbsR[2][0]);
-	if (abs(t[1] * R[0][2] - t[0] * R[1][2]) < fThisRadius + fOtherRadius)
+	ra = (eA[0] * AbsR[1][2]) + (eA[1] * AbsR[0][2]);
+	rb = (eB[0] * AbsR[2][1]) + (eB[1] * AbsR[2][0]);
+	if (glm::abs(t[1] * R[0][2] - t[0] * R[1][2]) < ra + rb)
 		return eSATResults::SAT_AZxBZ;
 
 	//there is no axis test that separates this two objects
