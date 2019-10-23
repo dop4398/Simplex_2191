@@ -326,7 +326,6 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 		a_pOther->GetHalfWidth().z
 	};
 
-
 	// Compute the rotation matrix expressing a_pOther in this MyRigidBody's coordinate frame
 	for (int i = 0; i < 3; i++)
 	{
@@ -336,7 +335,7 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 		}
 	}
 	// Compute the translation vector t
-	vector3 t = glm::abs(a_pOther->GetCenterGlobal() - this->GetCenterGlobal());
+	vector3 t = glm::abs(a_pOther->GetCenterLocal() - this->GetCenterLocal());
 	// Begin the translation into a's coordinate frame
 	t = vector3(glm::dot(t, uA[0]), glm::dot(t, uA[1]), glm::dot(t, uA[2]));
 
@@ -354,11 +353,11 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	{
 		ra = this->GetHalfWidth()[i];
 		rb = (eB[0] * AbsR[i][0]) + (eB[1] * AbsR[i][1]) + eB[2];
-		if (glm::abs(t[i]) < ra + rb && i == 0)												// ** change sign
+		if (glm::abs(t[i]) > ra + rb && i == 0)
 			return eSATResults::SAT_AX;
-		else if(glm::abs(t[i]) < ra + rb && i == 1)
+		else if(glm::abs(t[i]) > ra + rb && i == 1)
 			return eSATResults::SAT_AY;
-		else if (glm::abs(t[i]) < ra + rb && i == 2)
+		else if (glm::abs(t[i]) > ra + rb && i == 2)
 			return eSATResults::SAT_AZ;
 	}
 	// Test axes L = B0, L = B1, L = B2
@@ -366,60 +365,60 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	{
 		rb = a_pOther->GetHalfWidth()[i];
 		ra = (eA[0] * AbsR[0][i]) + (eA[1] * AbsR[1][i]) + eA[2];
-		if (glm::abs(t[0] * R[0][i] + t[1] * R[1][i] + t[2] * R[2][i]) < ra + rb && i == 0)	// ** change sign
+		if (glm::abs(t[0] * R[0][i] + t[1] * R[1][i] + t[2] * R[2][i]) > ra + rb && i == 0)
 			return eSATResults::SAT_BX;
-		if (glm::abs(t[0] * R[0][i] + t[1] * R[1][i] + t[2] * R[2][i]) < ra + rb && i == 1)	// ** change sign
+		if (glm::abs(t[0] * R[0][i] + t[1] * R[1][i] + t[2] * R[2][i]) > ra + rb && i == 1)
 			return eSATResults::SAT_BY;
-		if (glm::abs(t[0] * R[0][i] + t[1] * R[1][i] + t[2] * R[2][i]) < ra + rb && i == 2)	// ** change sign
+		if (glm::abs(t[0] * R[0][i] + t[1] * R[1][i] + t[2] * R[2][i]) > ra + rb && i == 2)
 			return eSATResults::SAT_BZ;
 	}
 
 	// Test axis L = A0 x B0
 	ra = (eA[1] * AbsR[2][0]) +  (eA[2] * AbsR[1][0]);
 	rb = (eB[1] * AbsR[0][2]) + (eB[2] * AbsR[0][1]);
-	if (glm::abs(t[2] * R[1][0] - t[1] * R[2][0]) < ra + rb)
+	if (glm::abs(t[2] * R[1][0] - t[1] * R[2][0]) > ra + rb)
 		return eSATResults::SAT_AXxBX;
 	// Test axis L = A0 x B1
 	ra = (eA[1] * AbsR[2][1]) + (eA[2] * AbsR[1][1]);
 	rb = (eB[0] * AbsR[0][2]) + (eB[2] * AbsR[0][0]);
-	if (glm::abs(t[2] * R[1][1] - t[1] * R[2][1]) < ra + rb)
+	if (glm::abs(t[2] * R[1][1] - t[1] * R[2][1]) > ra + rb)
 		return eSATResults::SAT_AXxBY;
 	// Test axis L = A0 x B2
 	ra = (eA[1] * AbsR[2][2]) + (eA[2] * AbsR[1][2]);
 	rb = (eB[0] * AbsR[0][1]) + (eB[1] * AbsR[0][0]);
-	if (glm::abs(t[2] * R[1][2] - t[1] * R[2][2]) < ra + rb)
+	if (glm::abs(t[2] * R[1][2] - t[1] * R[2][2]) > ra + rb)
 		return eSATResults::SAT_AXxBZ;
 
 	// Test axis L = A1 x B0
 	ra = (eA[0] * AbsR[2][0]) + (eA[2] * AbsR[0][0]);
 	rb = (eB[1] * AbsR[1][2]) + (eB[2] * AbsR[1][1]);
-	if (glm::abs(t[0] * R[2][0] - t[2] * R[0][0]) < ra + rb)
+	if (glm::abs(t[0] * R[2][0] - t[2] * R[0][0]) > ra + rb)
 		return eSATResults::SAT_AYxBX;
 	// Test axis L = A1 x B1
 	ra = (eA[0] * AbsR[2][1]) + (eA[2] * AbsR[0][1]);
 	rb = (eB[0] * AbsR[1][2]) + (eB[2] * AbsR[1][0]);
-	if (glm::abs(t[0] * R[2][1] - t[2] * R[0][1]) < ra + rb)
+	if (glm::abs(t[0] * R[2][1] - t[2] * R[0][1]) > ra + rb)
 		return eSATResults::SAT_AYxBX;
 	// Test axis L = A1 x B2
 	ra = (eA[0] * AbsR[2][2]) + (eA[2] * AbsR[0][2]);
 	rb = (eB[0] * AbsR[1][1]) + (eB[1] * AbsR[1][0]);
-	if (glm::abs(t[0] * R[2][2] - t[2] * R[0][2]) < ra + rb)
+	if (glm::abs(t[0] * R[2][2] - t[2] * R[0][2]) > ra + rb)
 		return eSATResults::SAT_AYxBZ;
 
 	// Test axis L = A2 x B0
 	ra = (eA[0] * AbsR[1][0]) + (eA[1] * AbsR[0][0]);
 	rb = (eB[1] * AbsR[2][2]) + (eB[2] * AbsR[2][1]);
-	if (glm::abs(t[1] * R[0][0] - t[0] * R[1][0]) < ra + rb)
+	if (glm::abs(t[1] * R[0][0] - t[0] * R[1][0]) > ra + rb)
 		return eSATResults::SAT_AZxBX;
 	// Test axis L = A2 x B1
 	ra = (eA[0] * AbsR[1][1]) + (eA[1] * AbsR[0][1]);
 	rb = (eB[0] * AbsR[2][2]) + (eB[2] * AbsR[2][0]);
-	if (glm::abs(t[1] * R[0][1] - t[0] * R[1][1]) < ra + rb)
+	if (glm::abs(t[1] * R[0][1] - t[0] * R[1][1]) > ra + rb)
 		return eSATResults::SAT_AZxBY;
 	// Test axis L = A2 x B2
 	ra = (eA[0] * AbsR[1][2]) + (eA[1] * AbsR[0][2]);
 	rb = (eB[0] * AbsR[2][1]) + (eB[1] * AbsR[2][0]);
-	if (glm::abs(t[1] * R[0][2] - t[0] * R[1][2]) < ra + rb)
+	if (glm::abs(t[1] * R[0][2] - t[0] * R[1][2]) > ra + rb)
 		return eSATResults::SAT_AZxBZ;
 
 	//there is no axis test that separates this two objects
