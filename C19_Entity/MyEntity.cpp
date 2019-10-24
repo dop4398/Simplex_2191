@@ -121,6 +121,14 @@ MyEntity* Simplex::MyEntity::GetEntity(String a_sUniqueID)
 }
 void Simplex::MyEntity::GenUniqueID(String& a_sUniqueID)
 {
+	/*
+	Hold the entities in a vector
+	standard vector of the IDs for use in the map
+	Removal of entities?
+		Let that memory linger until the end of the program - wasteful
+		Lists are fairly easy to remove things from
+	check out entity manager in C20
+	*/
 	static uint index = 0;
 	String sName = a_sUniqueID;
 	MyEntity* pEntity = GetEntity(a_sUniqueID);

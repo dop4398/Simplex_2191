@@ -69,7 +69,9 @@ void Application::Update(void)
 	m_pEntityMngr->Update();
 		
 	//Add objects to render list
-	m_pEntityMngr->AddEntityToRenderList(-1, true);
+	m_pEntityMngr->AddEntityToRenderList(-1, true); // -1 means render all entities on the list
+	// we can also name specific entities to render
+	//m_pEntityMngr->AddEntityToRenderList("Steve");
 }
 void Application::Display(void)
 {

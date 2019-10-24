@@ -11,6 +11,13 @@ void Application::InitVariables(void)
 
 	//creeper
 	m_pCreeper = new MyEntity("Minecraft\\Creeper.obj", "Creeper");
+	std::vector<MyEntity*> EntityList;
+	for (uint i = 0; i < 5; i++)
+	{
+		// We are already making an entity called "Creeper"
+		// the ones made here will be renamed to "Creeper_0" through "Creeper_4" automatically thanks to the GenUniqueID method
+		EntityList.push_back(new MyEntity("Minecraft\\Creeper.obj", "Creeper"));
+	}
 
 	//steve
 	m_pSteve = new MyEntity("Minecraft\\Steve.obj", "Steve");
