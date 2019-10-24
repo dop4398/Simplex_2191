@@ -334,7 +334,7 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 		}
 	}
 	// Compute the translation vector t
-	vector3 t = glm::abs(a_pOther->GetCenterGlobal() - this->GetCenterGlobal());
+	vector3 t = a_pOther->GetCenterGlobal() - this->GetCenterGlobal();
 	// Begin the translation into a's coordinate frame
 	t = vector3(glm::dot(t, uA[0]), glm::dot(t, uA[1]), glm::dot(t, uA[2]));
 
@@ -350,32 +350,20 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	// Test axes L = A0, L = A1, L = A2
 	for (int i = 0; i < 3; i++)
 	{
-		ra = this->GetHalfWidth()[i];
-		rb = (eB[0] * AbsR[i][0]) + (eB[1] * AbsR[i][1]) + eB[2];
+		ra = eA[i];
+		rb = (eB[0] * AbsR[i][0]) + (eB[1] * AbsR[i][1]) + (eB[2] * AbsR[i][2]);
 		if (glm::abs(t[i]) > ra + rb)
 		{
 			// Different axis depending on i
 			switch (i)
 			{
-			case 0:			
-				m_pMeshMngr->AddPlaneToRenderList(
-					this->GetModelMatrix() - (this->GetModelMatrix() - a_pOther->GetModelMatrix()) / 2,
-					C_YELLOW, 
-					1);
+			case 0:	// A0
 				return eSATResults::SAT_AX;
 				break;
-			case 1:
-				m_pMeshMngr->AddPlaneToRenderList(
-					this->GetModelMatrix() - (this->GetModelMatrix() - a_pOther->GetModelMatrix()) / 2,
-					C_YELLOW,
-					1);
+			case 1: // A1
 				return eSATResults::SAT_AY;
 				break;
-			default:
-				m_pMeshMngr->AddPlaneToRenderList(
-					this->GetModelMatrix() - (this->GetModelMatrix() - a_pOther->GetModelMatrix()) / 2,
-					C_YELLOW,
-					1);
+			default: // A2
 				return eSATResults::SAT_AZ;
 				break;
 			}
@@ -384,32 +372,20 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	// Test axes L = B0, L = B1, L = B2
 	for (int i = 0; i < 3; i++)
 	{
-		rb = a_pOther->GetHalfWidth()[i];
-		ra = (eA[0] * AbsR[0][i]) + (eA[1] * AbsR[1][i]) + eA[2];
+		rb = eB[i];
+		ra = (eA[0] * AbsR[0][i]) + (eA[1] * AbsR[1][i]) + (eA[2] * AbsR[2][i]);
 		if (glm::abs(t[0] * R[0][i] + t[1] * R[1][i] + t[2] * R[2][i]) > ra + rb)
 		{
 			// Different axis depending on i
 			switch (i)
 			{
-			case 0:
-				m_pMeshMngr->AddPlaneToRenderList(
-					this->GetModelMatrix() - (this->GetModelMatrix() - a_pOther->GetModelMatrix()) / 2,
-					C_YELLOW,
-					1);
+			case 0: // B0
 				return eSATResults::SAT_BX;
 				break;
-			case 1:
-				m_pMeshMngr->AddPlaneToRenderList(
-					this->GetModelMatrix() - (this->GetModelMatrix() - a_pOther->GetModelMatrix()) / 2,
-					C_YELLOW,
-					1);
+			case 1: // B1
 				return eSATResults::SAT_BY;
 				break;
-			default:
-				m_pMeshMngr->AddPlaneToRenderList(
-					this->GetModelMatrix() - (this->GetModelMatrix() - a_pOther->GetModelMatrix()) / 2,
-					C_YELLOW,
-					1);
+			default: // B2
 				return eSATResults::SAT_BZ;
 				break;
 			}
