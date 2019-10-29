@@ -393,7 +393,7 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	}
 
 	// Test axis L = A0 x B0
-	ra = (eA[1] * AbsR[2][0]) +  (eA[2] * AbsR[1][0]);
+	ra = (eA[1] * AbsR[2][0]) + (eA[2] * AbsR[1][0]);
 	rb = (eB[1] * AbsR[0][2]) + (eB[2] * AbsR[0][1]);
 	if (glm::abs(t[2] * R[1][0] - t[1] * R[2][0]) > ra + rb)
 		return eSATResults::SAT_AXxBX;
@@ -417,7 +417,7 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	ra = (eA[0] * AbsR[2][1]) + (eA[2] * AbsR[0][1]);
 	rb = (eB[0] * AbsR[1][2]) + (eB[2] * AbsR[1][0]);
 	if (glm::abs(t[0] * R[2][1] - t[2] * R[0][1]) > ra + rb)
-		return eSATResults::SAT_AYxBX;
+		return eSATResults::SAT_AYxBY;
 	// Test axis L = A1 x B2
 	ra = (eA[0] * AbsR[2][2]) + (eA[2] * AbsR[0][2]);
 	rb = (eB[0] * AbsR[1][1]) + (eB[1] * AbsR[1][0]);

@@ -17,6 +17,8 @@ class MyEntity
 	bool m_bSetAxis = false; //render axis flag
 	String m_sUniqueID = ""; //Unique identifier name
 
+
+
 	uint m_uMainDimension = 0; //which is the dimension this object lives at
 	uint m_nDimensionCount = 0; //tells how many dimensions this entity lives in
 	std::vector<uint> m_DimensionList; //Dimensions on which this entity is located
