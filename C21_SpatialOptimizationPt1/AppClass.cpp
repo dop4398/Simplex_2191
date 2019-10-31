@@ -31,6 +31,7 @@ void Application::InitVariables(void)
 			//m_pEntityMngr->AddDimension(-1, uIndex);
 			//++uIndex;
 			
+			// Adding the dimensions ****************************************
 			if (v3Position.x < 0.0f)
 			{
 				if (v3Position.x < -17.0f)
