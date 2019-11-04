@@ -278,18 +278,156 @@ void MyRigidBody::ClearCollidingList(void)
 uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 {
 	/*
-	Your code goes here instead of this comment;
-
-	For this method, if there is an axis that separates the two objects
-	then the return will be different than 0; 1 for any separating axis
-	is ok if you are not going for the extra credit, if you could not
-	find a separating axis you need to return 0, there is an enum in
-	Simplex that might help you [eSATResults] feel free to use it.
-	(eSATResults::SAT_NONE has a value of 0)
+	ra = this.GetRadius()
+	rb = a_pOther.GetRadius()
+	u[3] = local x-, y-, and z- axes (vector3[3])
+	a = this
+	b = a_pOther
+	c = GetCenterGlobal
+	e = positive GetHalfWidth() extents of OBB along each axis
 	*/
 
+	matrix3 R, AbsR;
+	float ra, rb;
+	// Set up 'u's and 'e's ******************************************************************************************************
+	vector3 uA[3] = {
+		vector3(this->GetModelMatrix()[0]),
+		vector3(this->GetModelMatrix()[1]),
+		vector3(this->GetModelMatrix()[2])
+	};
+	vector3 uB[3] = {
+		vector3(a_pOther->GetModelMatrix()[0]),
+		vector3(a_pOther->GetModelMatrix()[1]),
+		vector3(a_pOther->GetModelMatrix()[2])
+	};
+	float eA[3] = {
+		this->GetHalfWidth().x,
+		this->GetHalfWidth().y,
+		this->GetHalfWidth().z
+	};
+	float eB[3] = {
+		a_pOther->GetHalfWidth().x,
+		a_pOther->GetHalfWidth().y,
+		a_pOther->GetHalfWidth().z
+	};
+
+	// Compute the rotation matrix expressing a_pOther in this MyRigidBody's coordinate frame
+	for (int i = 0; i < 3; i++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			R[i][j] = glm::dot(uA[i], uB[j]);
+		}
+	}
+	// Compute the translation vector t
+	vector3 t = a_pOther->GetCenterGlobal() - this->GetCenterGlobal();
+	// Begin the translation into a's coordinate frame
+	t = vector3(glm::dot(t, uA[0]), glm::dot(t, uA[1]), glm::dot(t, uA[2]));
+
+	// Compute common subexpressions. Add in an epsilon term to counteract arithmetic errors when two edges ar eparallel and their cross product is (near) null
+	for (int i = 0; i < 3; i++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			AbsR[i][j] = glm::abs(R[i][j]) + FLT_EPSILON;
+		}
+	}
+
+	// Test axes L = A0, L = A1, L = A2
+	for (int i = 0; i < 3; i++)
+	{
+		ra = eA[i];
+		rb = (eB[0] * AbsR[i][0]) + (eB[1] * AbsR[i][1]) + (eB[2] * AbsR[i][2]);
+		if (glm::abs(t[i]) > ra + rb)
+		{
+			// Different axis depending on i
+			switch (i)
+			{
+			case 0:	// A0
+				return eSATResults::SAT_AX;
+				break;
+			case 1: // A1
+				return eSATResults::SAT_AY;
+				break;
+			default: // A2
+				return eSATResults::SAT_AZ;
+				break;
+			}
+		}
+	}
+	// Test axes L = B0, L = B1, L = B2
+	for (int i = 0; i < 3; i++)
+	{
+		rb = eB[i];
+		ra = (eA[0] * AbsR[0][i]) + (eA[1] * AbsR[1][i]) + (eA[2] * AbsR[2][i]);
+		if (glm::abs(t[0] * R[0][i] + t[1] * R[1][i] + t[2] * R[2][i]) > ra + rb)
+		{
+			// Different axis depending on i
+			switch (i)
+			{
+			case 0: // B0
+				return eSATResults::SAT_BX;
+				break;
+			case 1: // B1
+				return eSATResults::SAT_BY;
+				break;
+			default: // B2
+				return eSATResults::SAT_BZ;
+				break;
+			}
+		}
+	}
+
+	// Test axis L = A0 x B0
+	ra = (eA[1] * AbsR[2][0]) + (eA[2] * AbsR[1][0]);
+	rb = (eB[1] * AbsR[0][2]) + (eB[2] * AbsR[0][1]);
+	if (glm::abs(t[2] * R[1][0] - t[1] * R[2][0]) > ra + rb)
+		return eSATResults::SAT_AXxBX;
+	// Test axis L = A0 x B1
+	ra = (eA[1] * AbsR[2][1]) + (eA[2] * AbsR[1][1]);
+	rb = (eB[0] * AbsR[0][2]) + (eB[2] * AbsR[0][0]);
+	if (glm::abs(t[2] * R[1][1] - t[1] * R[2][1]) > ra + rb)
+		return eSATResults::SAT_AXxBY;
+	// Test axis L = A0 x B2
+	ra = (eA[1] * AbsR[2][2]) + (eA[2] * AbsR[1][2]);
+	rb = (eB[0] * AbsR[0][1]) + (eB[1] * AbsR[0][0]);
+	if (glm::abs(t[2] * R[1][2] - t[1] * R[2][2]) > ra + rb)
+		return eSATResults::SAT_AXxBZ;
+
+	// Test axis L = A1 x B0
+	ra = (eA[0] * AbsR[2][0]) + (eA[2] * AbsR[0][0]);
+	rb = (eB[1] * AbsR[1][2]) + (eB[2] * AbsR[1][1]);
+	if (glm::abs(t[0] * R[2][0] - t[2] * R[0][0]) > ra + rb)
+		return eSATResults::SAT_AYxBX;
+	// Test axis L = A1 x B1
+	ra = (eA[0] * AbsR[2][1]) + (eA[2] * AbsR[0][1]);
+	rb = (eB[0] * AbsR[1][2]) + (eB[2] * AbsR[1][0]);
+	if (glm::abs(t[0] * R[2][1] - t[2] * R[0][1]) > ra + rb)
+		return eSATResults::SAT_AYxBY;
+	// Test axis L = A1 x B2
+	ra = (eA[0] * AbsR[2][2]) + (eA[2] * AbsR[0][2]);
+	rb = (eB[0] * AbsR[1][1]) + (eB[1] * AbsR[1][0]);
+	if (glm::abs(t[0] * R[2][2] - t[2] * R[0][2]) > ra + rb)
+		return eSATResults::SAT_AYxBZ;
+
+	// Test axis L = A2 x B0
+	ra = (eA[0] * AbsR[1][0]) + (eA[1] * AbsR[0][0]);
+	rb = (eB[1] * AbsR[2][2]) + (eB[2] * AbsR[2][1]);
+	if (glm::abs(t[1] * R[0][0] - t[0] * R[1][0]) > ra + rb)
+		return eSATResults::SAT_AZxBX;
+	// Test axis L = A2 x B1
+	ra = (eA[0] * AbsR[1][1]) + (eA[1] * AbsR[0][1]);
+	rb = (eB[0] * AbsR[2][2]) + (eB[2] * AbsR[2][0]);
+	if (glm::abs(t[1] * R[0][1] - t[0] * R[1][1]) > ra + rb)
+		return eSATResults::SAT_AZxBY;
+	// Test axis L = A2 x B2
+	ra = (eA[0] * AbsR[1][2]) + (eA[1] * AbsR[0][2]);
+	rb = (eB[0] * AbsR[2][1]) + (eB[1] * AbsR[2][0]);
+	if (glm::abs(t[1] * R[0][2] - t[0] * R[1][2]) > ra + rb)
+		return eSATResults::SAT_AZxBZ;
+
 	//there is no axis test that separates this two objects
-	return 0;
+	return eSATResults::SAT_NONE;
 }
 bool MyRigidBody::IsColliding(MyRigidBody* const a_pOther)
 {
