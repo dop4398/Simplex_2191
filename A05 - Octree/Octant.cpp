@@ -28,22 +28,22 @@ void Simplex::Octant::Swap(Octant& other)
 
 float Simplex::Octant::GetSize(void)
 {
-	return 0.0f;
+	return m_fSize;
 }
 
 vector3 Simplex::Octant::GetCenterGlobal(void)
 {
-	return vector3();
+	return m_v3Center; // *** this and the two methods below may need to be applied to global space, unknown if they already are ***
 }
 
 vector3 Simplex::Octant::GetMinGlobal(void)
 {
-	return vector3();
+	return m_v3Min;
 }
 
 vector3 Simplex::Octant::GetMaxGlobal(void)
 {
-	return vector3();
+	return m_v3Max;
 }
 
 bool Simplex::Octant::IsColliding(uint a_uRBIndex)
@@ -73,16 +73,18 @@ void Simplex::Octant::Subdivide(void)
 
 Octant* Simplex::Octant::GetChild(uint a_nChild)
 {
-	return nullptr;
+	return m_pChild[a_nChild];
 }
 
 Octant* Simplex::Octant::GetParent(void)
 {
-	return nullptr;
+	return m_pParent;
 }
 
 bool Simplex::Octant::IsLeaf(void)
 {
+	if (m_uChildren == 0)
+		return true;
 	return false;
 }
 
@@ -105,7 +107,7 @@ void Simplex::Octant::AssignIDtoEntity(void)
 
 uint Simplex::Octant::GetOctantCount(void)
 {
-	return uint();
+	return m_uOctantCount;
 }
 
 void Simplex::Octant::Release(void)
