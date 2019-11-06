@@ -8,8 +8,46 @@ uint Octant::m_uIdealEntityCount = 5;
 Simplex::Octant::Octant(uint a_nMaxLevel, uint a_nIdealEntityCount)
 {
 	Init();
+	m_uOctantCount = 0;
 	m_uMaxLevel = a_nMaxLevel;
 	m_uIdealEntityCount = a_nIdealEntityCount;
+	m_uID = 0; //
+	// This is the root
+	m_pRoot = this;
+	m_lChild.clear();
+	// Min and Max vectors stored here
+	std::vector<vector3> lMinMax;
+
+	//nt nObjects = m_pEntityMngr->GetEntityCount();
+	for (uint i = 0; i < m_pEntityMngr->GetEntityCount(); i++)
+	{
+		// Get the min and max of each entity for lMinMax
+		MyEntity* pEntity = m_pEntityMngr->GetEntity(i);
+		MyRigidBody* pRigidBody = pEntity->GetRigidBody();
+		lMinMax.push_back(pRigidBody->GetMinGlobal());
+		lMinMax.push_back(pRigidBody->GetMaxGlobal());
+	}
+
+	MyRigidBody* pRigidBody = new MyRigidBody(lMinMax);
+	vector3 vHalfWidth = pRigidBody->GetHalfWidth();
+	float fMax = vHalfWidth.x;
+	for (int i = 0; i < 3; i++)
+	{
+		if (fMax < vHalfWidth[i])
+			fMax = vHalfWidth[i];
+	}
+	vector3 v3Center = pRigidBody->GetCenterLocal();
+	// clear the list and delete pRigidBody since we're done with it
+	lMinMax.clear();
+	SafeDelete(pRigidBody);
+	// Set up the last few variables
+	m_fSize = fMax * 2.0f;
+	m_v3Center = v3Center;
+	m_v3Min = m_v3Center - (vector3(fMax)); // since this is a cube, we can use fMax for x, y, and z
+	m_v3Max = m_v3Center + (vector3(fMax));
+
+	m_uOctantCount++;
+	ConstructTree(m_uMaxLevel);
 }
 
 Simplex::Octant::Octant(vector3 a_v3Center, float a_fSize)
@@ -63,16 +101,14 @@ Simplex::Octant::~Octant(void) { Release(); }
 
 void Simplex::Octant::Release(void)
 {
-	m_pMeshMngr = nullptr;
-	m_pEntityMngr = nullptr;
-
-	if (m_pChild)
-	{
-		delete[] m_pChild;
-		//m_pChild = nullptr; // same error as above
-	}
-	SafeDelete(m_pParent);
-	SafeDelete(m_pRoot);
+	if (m_uLevel == 0)
+		KillBranches();
+	// children? not here
+	m_fSize = 0.0f;
+	m_uChildren = 0;
+	// clear them lists
+	m_EntityList.clear();
+	m_lChild.clear();
 }
 
 void Simplex::Octant::Init(void)
@@ -98,7 +134,7 @@ void Simplex::Octant::Init(void)
 	}
 
 	m_pMeshMngr = MeshManager::GetInstance();
-	m_pEntityMngr = EntityManager::GetInstance();
+	m_pEntityMngr = MyEntityManager::GetInstance();
 }
 
 void Simplex::Octant::Swap(Octant& other)
@@ -114,7 +150,7 @@ void Simplex::Octant::Swap(Octant& other)
 	std::swap(m_fSize, other.m_fSize);
 
 	m_pMeshMngr = MeshManager::GetInstance();
-	m_pEntityMngr = EntityManager::GetInstance();
+	m_pEntityMngr = MyEntityManager::GetInstance();
 
 	std::swap(m_v3Center, other.m_v3Center);
 	std::swap(m_v3Min, other.m_v3Min);
