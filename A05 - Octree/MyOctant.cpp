@@ -60,7 +60,6 @@ MyOctant::MyOctant(vector3 a_v3Center, float a_fSize)
 	m_v3Min = m_v3Center - (vector3(m_fSize) / 2.0f);
 	m_v3Max = m_v3Center + (vector3(m_fSize) / 2.0f);
 	m_uOctantCount++;
-	ConstructTree(m_uMaxLevel);
 }
 
 MyOctant::MyOctant(MyOctant const& other)
@@ -295,31 +294,31 @@ void MyOctant::Subdivide(void)
 	v3Center.z -= fSize;
 	m_pChild[0] = new MyOctant(v3Center, fSizeDouble);
 
-	// Bottom right back
+	// Bottom right back 1 
 	v3Center.x += fSizeDouble;
 	m_pChild[1] = new MyOctant(v3Center, fSizeDouble);
 
-	// Bottom right front
+	// Bottom right front 2
 	v3Center.z += fSizeDouble;
 	m_pChild[2] = new MyOctant(v3Center, fSizeDouble);
 
-	// Bottom left front
+	// Bottom left front 3
 	v3Center.x -= fSizeDouble;
 	m_pChild[3] = new MyOctant(v3Center, fSizeDouble);
 
-	// Top left front
+	// Top left front 4
 	v3Center.y += fSizeDouble;
 	m_pChild[4] = new MyOctant(v3Center, fSizeDouble);
 
-	// Top left back
+	// Top left back 5
 	v3Center.z -= fSizeDouble;
 	m_pChild[5] = new MyOctant(v3Center, fSizeDouble);
 
-	// Top right back
+	// Top right back 6
 	v3Center.x += fSizeDouble;
 	m_pChild[6] = new MyOctant(v3Center, fSizeDouble);
 
-	// Top right front
+	// Top right front 7
 	v3Center.z += fSizeDouble;
 	m_pChild[7] = new MyOctant(v3Center, fSizeDouble);
 
@@ -414,9 +413,7 @@ void MyOctant::ConstructTree(uint a_nMaxLevel)
 		std::cout << "Just before Subdivide" << std::endl;
 		Subdivide();
 		std::cout << "Just after Subdivide" << std::endl;
-
-	}
-		
+	}		
 
 	AssignIDtoEntity(); // Add those IDs
 	ConstructList(); // Make the list of objects
