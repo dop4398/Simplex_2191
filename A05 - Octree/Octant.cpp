@@ -250,10 +250,23 @@ void Simplex::Octant::DisplayLeafs(vector3 a_v3Color)
 	// Displays the non-empty leafs in the octree
 	// Check each leaf - see if it contains any entities
 	// Draw it if it does
+	uint nLeafs = m_lChild.size();
+	for (uint i = 0; i < nLeafs; i++)
+	{
+		m_lChild[i]->DisplayLeafs(a_v3Color); // recursion baby!
+	}
+	// Render
+	m_pMeshMngr->AddWireCubeToRenderList(glm::translate(IDENTITY_M4, m_v3Center) *
+		glm::scale(vector3(m_fSize)), a_v3Color, RENDER_WIRE);
 }
 
 void Simplex::Octant::ClearEntityList(void)
 {
+	for (uint i = 0; i < m_uChildren; i++)
+	{
+		m_pChild[i]->ClearEntityList(); // even more recursion!
+	}
+	m_EntityList.clear();
 }
 
 void Simplex::Octant::Subdivide(void)
@@ -370,10 +383,42 @@ void Simplex::Octant::KillBranches(void)
 
 void Simplex::Octant::ConstructTree(uint a_nMaxLevel)
 {
+	// Should only apply to the root
+	if (m_uLevel != 0)
+		return;
+
+	m_uMaxLevel = a_nMaxLevel;
+	m_uOctantCount = 1;
+	// Clear the tree
+	m_EntityList.clear();
+	KillBranches();
+	m_lChild.clear();
+
+	if (ContainsMoreThan(m_uIdealEntityCount))
+		Subdivide();
+
+	AssignIDtoEntity(); // Add those IDs
+	ConstructList(); // Make the list of objects
 }
 
 void Simplex::Octant::AssignIDtoEntity(void)
 {
+	for (uint i = 0; i < m_uChildren; i++)
+	{
+		m_pChild[i]->AssignIDtoEntity();
+	}
+	if (m_uChildren == 0) // If a leaf...
+	{
+		//uint nEntities = m_pEntityMngr->GetEntityCount();
+		for (uint i = 0; i < m_pEntityMngr->GetEntityCount(); i++)
+		{
+			if (IsColliding(i))
+			{
+				m_EntityList.push_back(i);
+				m_pEntityMngr->AddDimension(i, m_uID);
+			}
+		}
+	}
 }
 
 uint Simplex::Octant::GetOctantCount(void)
@@ -383,4 +428,11 @@ uint Simplex::Octant::GetOctantCount(void)
 
 void Simplex::Octant::ConstructList(void)
 {
+	for (uint i = 0; i < m_uChildren; i++)
+	{
+		m_pChild[i]->ConstructList(); // recursion
+	}
+
+	if (m_EntityList.size() > 0)
+		m_pRoot->m_lChild.push_back(this);
 }
