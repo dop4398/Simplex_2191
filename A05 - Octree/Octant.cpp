@@ -55,34 +55,35 @@ Simplex::Octant::Octant(vector3 a_v3Center, float a_fSize)
 	Init();
 	m_v3Center = a_v3Center;
 	m_fSize = a_fSize;
+	m_v3Min = m_v3Center - (vector3(m_fSize) / 2.0f);
+	m_v3Max = m_v3Center + (vector3(m_fSize) / 2.0f);
+	m_uOctantCount++;
+	ConstructTree(m_uMaxLevel);
 }
 
 Simplex::Octant::Octant(Octant const& other)
 {
-	m_uOctantCount = other.m_uOctantCount;
-	m_uMaxLevel = other.m_uMaxLevel;
-	m_uIdealEntityCount = other.m_uIdealEntityCount;
-
 	m_uID = other.m_uID;
 	m_uLevel = other.m_uLevel;
 	m_uChildren = other.m_uChildren;
 
 	m_fSize = other.m_fSize;
 
-	m_pMeshMngr = other.m_pMeshMngr;
-	m_pEntityMngr = other.m_pEntityMngr;
+	m_pMeshMngr = MeshManager::GetInstance();
+	m_pEntityMngr = MyEntityManager::GetInstance();
 
 	m_v3Center = other.m_v3Center;
 	m_v3Min = other.m_v3Min;
 	m_v3Max = other.m_v3Max;
 
-	m_pParent = other.m_pParent;
-	//m_pChild = other.m_pChild; // *** giving error ************************
-
-	m_EntityList = other.m_EntityList;
-
 	m_pRoot = other.m_pRoot;
 	m_lChild, other.m_lChild;
+
+	m_pParent = other.m_pParent;
+	for (int i = 0; i < 8; i++)
+	{
+		m_pChild[i] = other.m_pChild[i];
+	}
 }
 
 Octant& Simplex::Octant::operator=(Octant const& other)
@@ -97,7 +98,7 @@ Octant& Simplex::Octant::operator=(Octant const& other)
 	return *this;
 }
 
-Simplex::Octant::~Octant(void) { Release(); }
+Simplex::Octant::~Octant(void) { Release(); }//;
 
 void Simplex::Octant::Release(void)
 {
@@ -139,10 +140,6 @@ void Simplex::Octant::Init(void)
 
 void Simplex::Octant::Swap(Octant& other)
 {
-	//std::swap(m_uOctantCount, other.m_uOctantCount);
-	//std::swap(m_uMaxLevel, other.m_uMaxLevel);
-	//std::swap(m_uIdealEntityCount, other.m_uIdealEntityCount);
-
 	std::swap(m_uID, other.m_uID);
 	std::swap(m_uLevel, other.m_uLevel);
 	std::swap(m_uChildren, other.m_uChildren);
@@ -175,7 +172,7 @@ float Simplex::Octant::GetSize(void)
 
 vector3 Simplex::Octant::GetCenterGlobal(void)
 {
-	return m_v3Center; // *** this and the two methods below may need to be applied to global space, unknown if they already are ***
+	return m_v3Center;
 }
 
 vector3 Simplex::Octant::GetMinGlobal(void)
@@ -196,10 +193,27 @@ bool Simplex::Octant::IsColliding(uint a_uRBIndex)
 void Simplex::Octant::Display(uint a_nIndex, vector3 a_v3Color)
 {
 	//Displays a specific octant, specified by the index. Includes the objects underneath it (I assume this means its leafs)
+	if (m_uID == a_nIndex)
+	{
+		m_pMeshMngr->AddWireCubeToRenderList(glm::translate(IDENTITY_M4, m_v3Center) *
+			glm::scale(vector3(m_fSize)), a_v3Color, RENDER_WIRE);
+		return;
+	}
+
+	for (uint nIndex = 0; nIndex < m_uChildren; nIndex++)
+	{
+		m_pChild[nIndex]->Display(a_nIndex);
+	}
 }
 
 void Simplex::Octant::Display(vector3 a_v3Color)
 {
+	for (uint nIndex = 0; nIndex < m_uChildren; nIndex++)
+	{
+		m_pChild[nIndex]->Display(a_v3Color);
+	}
+	m_pMeshMngr->AddWireCubeToRenderList(glm::translate(IDENTITY_M4, m_v3Center) *
+		glm::scale(vector3(m_fSize)), a_v3Color, RENDER_WIRE);
 }
 
 void Simplex::Octant::DisplayLeafs(vector3 a_v3Color)
@@ -215,6 +229,65 @@ void Simplex::Octant::ClearEntityList(void)
 
 void Simplex::Octant::Subdivide(void)
 {
+	// Return if we're at the maximum depth
+	if (m_uLevel >= m_uMaxLevel)
+		return;
+
+	// also return if we've already subdivided
+	if (m_uChildren != 0)
+		return;
+
+	m_uChildren = 8;
+	float fSize = m_fSize / 4.0f;
+	float fSizeDouble = fSize * 2.0f;
+	vector3 v3Center;
+
+	// *** Make the new octants ***
+	v3Center = m_v3Center;
+
+	// Bottom left back
+	v3Center.x -= fSize;
+	v3Center.y -= fSize;
+	v3Center.z -= fSize;
+	m_pChild[0] = new Octant(v3Center, fSizeDouble);
+
+	// Bottom right back
+	v3Center.x += fSizeDouble;
+	m_pChild[1] = new Octant(v3Center, fSizeDouble);
+
+	// Bottom right front
+	v3Center.z += fSizeDouble;
+	m_pChild[2] = new Octant(v3Center, fSizeDouble);
+
+	// Bottom left front
+	v3Center.x -= fSizeDouble;
+	m_pChild[3] = new Octant(v3Center, fSizeDouble);
+
+	// Top left front
+	v3Center.y += fSizeDouble;
+	m_pChild[4] = new Octant(v3Center, fSizeDouble);
+
+	// Top left back
+	v3Center.z -= fSizeDouble;
+	m_pChild[5] = new Octant(v3Center, fSizeDouble);
+
+	// Top right back
+	v3Center.x += fSizeDouble;
+	m_pChild[6] = new Octant(v3Center, fSizeDouble);
+
+	// Top right front
+	v3Center.z += fSizeDouble;
+	m_pChild[7] = new Octant(v3Center, fSizeDouble);
+
+	for (uint i = 0; i < 8; i++)
+	{
+		m_pChild[i]->m_pRoot = m_pRoot;
+		m_pChild[i]->m_pParent = this;
+		m_pChild[i]->m_uLevel = m_uLevel + 1;
+		// If an octant contains more than the ideal # of entities, subdivide it.
+		if (m_pChild[i]->ContainsMoreThan(m_uIdealEntityCount))
+			m_pChild[i]->Subdivide(); // Recursion baby!
+	}
 }
 
 Octant* Simplex::Octant::GetChild(uint a_nChild)
