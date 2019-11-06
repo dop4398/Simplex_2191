@@ -1,6 +1,10 @@
 #include "Octant.h"
 using namespace Simplex;
 
+uint Octant::m_uOctantCount = 0;
+uint Octant::m_uMaxLevel = 3;
+uint Octant::m_uIdealEntityCount = 5;
+
 Simplex::Octant::Octant(uint a_nMaxLevel, uint a_nIdealEntityCount)
 {
 	Init();
@@ -73,7 +77,7 @@ void Simplex::Octant::Release(void)
 
 void Simplex::Octant::Init(void)
 {
-	m_uID = 0;
+	m_uID = m_uOctantCount;
 	m_uLevel = 0;
 	m_uChildren = 0;
 
@@ -87,15 +91,21 @@ void Simplex::Octant::Init(void)
 	m_v3Max = vector3(0.0f);
 
 	m_pParent = nullptr;
-	//m_pChild = nullptr; // ??? ****************************************
 	m_pRoot = nullptr;
+	for (uint i = 0; i < 8; i++)
+	{
+		m_pChild[i] = nullptr;
+	}
+
+	m_pMeshMngr = MeshManager::GetInstance();
+	m_pEntityMngr = EntityManager::GetInstance();
 }
 
 void Simplex::Octant::Swap(Octant& other)
 {
-	std::swap(m_uOctantCount, other.m_uOctantCount);
-	std::swap(m_uMaxLevel, other.m_uMaxLevel);
-	std::swap(m_uIdealEntityCount, other.m_uIdealEntityCount);
+	//std::swap(m_uOctantCount, other.m_uOctantCount);
+	//std::swap(m_uMaxLevel, other.m_uMaxLevel);
+	//std::swap(m_uIdealEntityCount, other.m_uIdealEntityCount);
 
 	std::swap(m_uID, other.m_uID);
 	std::swap(m_uLevel, other.m_uLevel);
@@ -103,18 +113,21 @@ void Simplex::Octant::Swap(Octant& other)
 
 	std::swap(m_fSize, other.m_fSize);
 
-	std::swap(m_pMeshMngr, other.m_pMeshMngr);
-	std::swap(m_pEntityMngr, other.m_pEntityMngr);
+	m_pMeshMngr = MeshManager::GetInstance();
+	m_pEntityMngr = EntityManager::GetInstance();
 
 	std::swap(m_v3Center, other.m_v3Center);
 	std::swap(m_v3Min, other.m_v3Min);
 	std::swap(m_v3Max, other.m_v3Max);
 
 	std::swap(m_pParent, other.m_pParent);
-	std::swap(m_pChild, other.m_pChild);
+	for (int i = 0; i < 8; i++)
+	{
+		std::swap(m_pChild[i], other.m_pChild[i]);
+	}
 
-	std::swap(m_EntityList, other.m_EntityList);
-
+	//std::swap(m_pChild, other.m_pChild);
+	//std::swap(m_EntityList, other.m_EntityList);
 	std::swap(m_pRoot, other.m_pRoot);
 	std::swap(m_lChild, other.m_lChild);
 }
