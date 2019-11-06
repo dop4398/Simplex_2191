@@ -47,7 +47,9 @@ MyOctant::MyOctant(uint a_nMaxLevel, uint a_nIdealEntityCount)
 	m_v3Max = m_v3Center + (vector3(fMax));
 
 	m_uOctantCount++;
+	std::cout << "Just before ConstructTree(m_uMaxLevel) " << m_uMaxLevel << std::endl;
 	ConstructTree(m_uMaxLevel);
+	std::cout << "End of constructor" << std::endl;
 }
 
 MyOctant::MyOctant(vector3 a_v3Center, float a_fSize)
@@ -124,15 +126,15 @@ void MyOctant::Init(void)
 	m_v3Min = vector3(0.0f);
 	m_v3Max = vector3(0.0f);
 
-	m_pParent = nullptr;
+	m_pMeshMngr = MeshManager::GetInstance();
+	m_pEntityMngr = MyEntityManager::GetInstance();
+
 	m_pRoot = nullptr;
+	m_pParent = nullptr;
 	for (uint i = 0; i < 8; i++)
 	{
 		m_pChild[i] = nullptr;
 	}
-
-	m_pMeshMngr = MeshManager::GetInstance();
-	m_pEntityMngr = MyEntityManager::GetInstance();
 }
 
 void MyOctant::Swap(MyOctant& other)
@@ -140,6 +142,9 @@ void MyOctant::Swap(MyOctant& other)
 	std::swap(m_uID, other.m_uID);
 	std::swap(m_uLevel, other.m_uLevel);
 	std::swap(m_uChildren, other.m_uChildren);
+
+	std::swap(m_pRoot, other.m_pRoot);
+	std::swap(m_lChild, other.m_lChild);
 
 	std::swap(m_fSize, other.m_fSize);
 
@@ -155,9 +160,6 @@ void MyOctant::Swap(MyOctant& other)
 	{
 		std::swap(m_pChild[i], other.m_pChild[i]);
 	}
-
-	std::swap(m_pRoot, other.m_pRoot);
-	std::swap(m_lChild, other.m_lChild);
 }
 
 float MyOctant::GetSize(void)
@@ -210,6 +212,7 @@ bool MyOctant::IsColliding(uint a_uRBIndex)
 	if (m_v3Min.z > v3MaxOctant.z)
 		return false;
 
+	//std::cout << "IsColliding() returns true" << std::endl;
 	// If everything passes, then the objects are colliding, so return true
 	return true;
 }
@@ -266,6 +269,8 @@ void MyOctant::ClearEntityList(void)
 
 void MyOctant::Subdivide(void)
 {
+	std::cout << "Start of Subdivide()" << std::endl;
+
 	// Return if we're at the maximum depth
 	if (m_uLevel >= m_uMaxLevel)
 		return;
@@ -273,6 +278,8 @@ void MyOctant::Subdivide(void)
 	// also return if we've already subdivided
 	if (m_uChildren != 0)
 		return;
+
+	std::cout << "Subdivide() continues" << std::endl;
 
 	m_uChildren = 8;
 	float fSize = m_fSize / 4.0f;
@@ -316,6 +323,8 @@ void MyOctant::Subdivide(void)
 	v3Center.z += fSizeDouble;
 	m_pChild[7] = new MyOctant(v3Center, fSizeDouble);
 
+	std::cout << "Subdivide() after creating new MyOctants" << std::endl;
+
 	for (uint i = 0; i < 8; i++)
 	{
 		m_pChild[i]->m_pRoot = m_pRoot;
@@ -323,8 +332,12 @@ void MyOctant::Subdivide(void)
 		m_pChild[i]->m_uLevel = m_uLevel + 1;
 		// If an octant contains more than the ideal # of entities, subdivide it.
 		if (m_pChild[i]->ContainsMoreThan(m_uIdealEntityCount))
+		{
+			std::cout << "Subdivide() recursive step" << std::endl;
 			m_pChild[i]->Subdivide(); // Recursion baby!
+		}	
 	}
+	std::cout << "End of Subdivide()" << std::endl;
 }
 
 MyOctant* MyOctant::GetChild(uint a_nChild)
@@ -356,7 +369,11 @@ bool MyOctant::ContainsMoreThan(uint a_nEntities)
 		if (IsColliding(i))
 			nCount++;
 		if (nCount > a_nEntities)
+		{
+			std::cout << "ContainsMoreThan() returns true" << std::endl;
 			return true;
+		}
+			
 	}
 	return false;
 }
@@ -378,22 +395,32 @@ void MyOctant::KillBranches(void)
 
 void MyOctant::ConstructTree(uint a_nMaxLevel)
 {
+	std::cout << "Start of ConstructTree(" << a_nMaxLevel << ")" << std::endl;
 	// Should only apply to the root
 	if (m_uLevel != 0)
 		return;
 
 	m_uMaxLevel = a_nMaxLevel;
 	m_uOctantCount = 1;
+
 	// Clear the tree
-	m_EntityList.clear();
+	//m_EntityList.clear();
+	ClearEntityList();
 	KillBranches();
 	m_lChild.clear();
 
 	if (ContainsMoreThan(m_uIdealEntityCount))
+	{
+		std::cout << "Just before Subdivide" << std::endl;
 		Subdivide();
+		std::cout << "Just after Subdivide" << std::endl;
+
+	}
+		
 
 	AssignIDtoEntity(); // Add those IDs
 	ConstructList(); // Make the list of objects
+	std::cout << "End of ConstructTree()" << std::endl;
 }
 
 void MyOctant::AssignIDtoEntity(void)
@@ -423,6 +450,8 @@ uint MyOctant::GetOctantCount(void)
 
 void MyOctant::ConstructList(void)
 {
+	std::cout << "Start of ConstructList()" << std::endl;
+
 	for (uint i = 0; i < m_uChildren; i++)
 	{
 		m_pChild[i]->ConstructList(); // recursion
@@ -430,4 +459,6 @@ void MyOctant::ConstructList(void)
 
 	if (m_EntityList.size() > 0)
 		m_pRoot->m_lChild.push_back(this);
+
+	std::cout << "End of ConstructList()" << std::endl;
 }
