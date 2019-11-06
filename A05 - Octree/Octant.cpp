@@ -187,7 +187,36 @@ vector3 Simplex::Octant::GetMaxGlobal(void)
 
 bool Simplex::Octant::IsColliding(uint a_uRBIndex)
 {
-	return false;
+	uint nObjectCount = m_pEntityMngr->GetEntityCount();
+	// no collision if the given index is greater than the # of entities in our box
+	if (a_uRBIndex >= nObjectCount)
+		return false;
+	// Get the min and max of the potentially colliding entity
+	MyEntity* pEntity = m_pEntityMngr->GetEntity(a_uRBIndex);
+	MyRigidBody* pRigidBody = pEntity->GetRigidBody();
+	vector3 v3MinOctant = pRigidBody->GetMinGlobal();
+	vector3 v3MaxOctant = pRigidBody->GetMaxGlobal();
+
+	// Check for x
+	if (m_v3Max.x < v3MinOctant.x)
+		return false;
+	if (m_v3Min.x > v3MaxOctant.x)
+		return false;
+
+	// Check for y
+	if (m_v3Max.y < v3MinOctant.y)
+		return false;
+	if (m_v3Min.y > v3MaxOctant.y)
+		return false;
+
+	// Check for z
+	if (m_v3Max.z < v3MinOctant.z)
+		return false;
+	if (m_v3Min.z > v3MaxOctant.z)
+		return false;
+
+	// If everything passes, then the objects are colliding, so return true
+	return true;
 }
 
 void Simplex::Octant::Display(uint a_nIndex, vector3 a_v3Color)
@@ -292,6 +321,9 @@ void Simplex::Octant::Subdivide(void)
 
 Octant* Simplex::Octant::GetChild(uint a_nChild)
 {
+	// Return nothing if the index is bad
+	if (a_nChild > 7)
+		return nullptr;
 	return m_pChild[a_nChild];
 }
 
@@ -309,13 +341,31 @@ bool Simplex::Octant::IsLeaf(void)
 
 bool Simplex::Octant::ContainsMoreThan(uint a_nEntities)
 {
-	if(m_EntityList.size() >= a_nEntities) // contains **at least** this many entities
-		return true;
+	uint nCount = 0;
+
+	for (uint i = 0; i < m_pEntityMngr->GetEntityCount(); i++)
+	{
+		if (IsColliding(i))
+			nCount++;
+		if (nCount > a_nEntities)
+			return true;
+	}
 	return false;
 }
 
 void Simplex::Octant::KillBranches(void)
 {
+	// Recursion here
+	// Essentially goes through the tree until it hits a node with no children.
+	// Then it goes back to that node's parent and kills the children.
+	// Does this until the node that called the method is reached.
+	for (uint nIndex = 0; nIndex < m_uChildren; nIndex++)
+	{
+		m_pChild[nIndex]->KillBranches();
+		delete m_pChild[nIndex];
+		m_pChild[nIndex] = nullptr;
+	}
+	m_uChildren = 0;
 }
 
 void Simplex::Octant::ConstructTree(uint a_nMaxLevel)
