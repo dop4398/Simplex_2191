@@ -23,7 +23,8 @@ void Application::InitVariables(void)
 		for (int j = 0; j < nSquare; j++)
 		{
 			uIndex++;
-			m_pEntityMngr->AddEntity("Minecraft\\Cube.obj");
+			//m_pEntityMngr->AddEntity("Minecraft\\Cube.obj");
+			m_pEntityMngr->AddEntity("H:\\Users\\David\\source\\repos\\IGME.309\\_Binary\\Data\\MOBJ\\Minecraft\\Cube.obj");
 			vector3 v3Position = vector3(glm::sphericalRand(34.0f));
 			matrix4 m4Position = glm::translate(v3Position);
 			m_pEntityMngr->SetModelMatrix(m4Position);
@@ -56,7 +57,10 @@ void Application::Display(void)
 	ClearScreen();
 
 	//display octree
-	//m_pRoot->Display();
+	if (m_uOctantID == -1)
+		m_pRoot->Display();
+	else
+		m_pRoot->Display(m_uOctantID);
 	
 	// draw a skybox
 	m_pMeshMngr->AddSkyboxToRenderList();
@@ -75,6 +79,9 @@ void Application::Display(void)
 }
 void Application::Release(void)
 {
+	// Release the Octree
+	SafeDelete(m_pRoot);
+
 	//release GUI
 	ShutdownGUI();
 }

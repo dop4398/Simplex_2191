@@ -11,7 +11,7 @@ MyOctant::MyOctant(uint a_nMaxLevel, uint a_nIdealEntityCount)
 	m_uOctantCount = 0;
 	m_uMaxLevel = a_nMaxLevel;
 	m_uIdealEntityCount = a_nIdealEntityCount;
-	m_uID = 0; //
+	m_uID = m_uOctantCount;
 	// This is the root
 	m_pRoot = this;
 	m_lChild.clear();
