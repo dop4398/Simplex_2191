@@ -7,7 +7,7 @@ Date: 11/2019
 #ifndef __MYOCTANTCLASS_H_
 #define __MYOCTANTCLASS_H_
 
-#include "Simplex\Physics\EntityManager.h"
+//#include "Simplex\Physics\EntityManager.h"
 #include "MyEntityManager.h"
 
 namespace Simplex

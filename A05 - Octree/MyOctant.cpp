@@ -65,23 +65,23 @@ MyOctant::MyOctant(vector3 a_v3Center, float a_fSize)
 
 MyOctant::MyOctant(MyOctant const& other)
 {
-	m_uID = other.m_uID;
-	m_uLevel = other.m_uLevel;
 	m_uChildren = other.m_uChildren;
-
-	m_fSize = other.m_fSize;
-
-	m_pMeshMngr = MeshManager::GetInstance();
-	m_pEntityMngr = MyEntityManager::GetInstance();
 
 	m_v3Center = other.m_v3Center;
 	m_v3Min = other.m_v3Min;
 	m_v3Max = other.m_v3Max;
 
+	m_fSize = other.m_fSize;
+	m_uID = other.m_uID;
+	m_uLevel = other.m_uLevel;
+
+	m_pParent = other.m_pParent;
 	m_pRoot = other.m_pRoot;
 	m_lChild, other.m_lChild;
 
-	m_pParent = other.m_pParent;
+	m_pMeshMngr = MeshManager::GetInstance();
+	m_pEntityMngr = MyEntityManager::GetInstance();
+
 	for (int i = 0; i < 8; i++)
 	{
 		m_pChild[i] = other.m_pChild[i];
@@ -462,3 +462,4 @@ void MyOctant::ConstructList(void)
 
 	std::cout << "End of ConstructList()" << std::endl;
 }
+// found the exact line where the `read access violation` exception is thrown for me, it's happening when i call `m_pRoot->m_lChild.push_back(this);`
