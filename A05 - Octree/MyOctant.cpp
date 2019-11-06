@@ -5,7 +5,7 @@ uint MyOctant::m_uOctantCount = 0;
 uint MyOctant::m_uMaxLevel = 3;
 uint MyOctant::m_uIdealEntityCount = 5;
 
-Simplex::MyOctant::MyOctant(uint a_nMaxLevel, uint a_nIdealEntityCount)
+MyOctant::MyOctant(uint a_nMaxLevel, uint a_nIdealEntityCount)
 {
 	Init();
 	m_uOctantCount = 0;
@@ -50,7 +50,7 @@ Simplex::MyOctant::MyOctant(uint a_nMaxLevel, uint a_nIdealEntityCount)
 	ConstructTree(m_uMaxLevel);
 }
 
-Simplex::MyOctant::MyOctant(vector3 a_v3Center, float a_fSize)
+MyOctant::MyOctant(vector3 a_v3Center, float a_fSize)
 {
 	Init();
 	m_v3Center = a_v3Center;
@@ -61,7 +61,7 @@ Simplex::MyOctant::MyOctant(vector3 a_v3Center, float a_fSize)
 	ConstructTree(m_uMaxLevel);
 }
 
-Simplex::MyOctant::MyOctant(MyOctant const& other)
+MyOctant::MyOctant(MyOctant const& other)
 {
 	m_uID = other.m_uID;
 	m_uLevel = other.m_uLevel;
@@ -86,7 +86,7 @@ Simplex::MyOctant::MyOctant(MyOctant const& other)
 	}
 }
 
-MyOctant& Simplex::MyOctant::operator=(MyOctant const& other)
+MyOctant& MyOctant::operator=(MyOctant const& other)
 {
 	if (this != &other)
 	{
@@ -98,9 +98,9 @@ MyOctant& Simplex::MyOctant::operator=(MyOctant const& other)
 	return *this;
 }
 
-Simplex::MyOctant::~MyOctant(void) { Release(); }//;
+MyOctant::~MyOctant(void) { Release(); };
 
-void Simplex::MyOctant::Release(void)
+void MyOctant::Release(void)
 {
 	if (m_uLevel == 0)
 		KillBranches();
@@ -112,7 +112,7 @@ void Simplex::MyOctant::Release(void)
 	m_lChild.clear();
 }
 
-void Simplex::MyOctant::Init(void)
+void MyOctant::Init(void)
 {
 	m_uID = m_uOctantCount;
 	m_uLevel = 0;
@@ -138,7 +138,7 @@ void Simplex::MyOctant::Init(void)
 	m_pEntityMngr = MyEntityManager::GetInstance();
 }
 
-void Simplex::MyOctant::Swap(MyOctant& other)
+void MyOctant::Swap(MyOctant& other)
 {
 	std::swap(m_uID, other.m_uID);
 	std::swap(m_uLevel, other.m_uLevel);
@@ -163,27 +163,27 @@ void Simplex::MyOctant::Swap(MyOctant& other)
 	std::swap(m_lChild, other.m_lChild);
 }
 
-float Simplex::MyOctant::GetSize(void)
+float MyOctant::GetSize(void)
 {
 	return m_fSize;
 }
 
-vector3 Simplex::MyOctant::GetCenterGlobal(void)
+vector3 MyOctant::GetCenterGlobal(void)
 {
 	return m_v3Center;
 }
 
-vector3 Simplex::MyOctant::GetMinGlobal(void)
+vector3 MyOctant::GetMinGlobal(void)
 {
 	return m_v3Min;
 }
 
-vector3 Simplex::MyOctant::GetMaxGlobal(void)
+vector3 MyOctant::GetMaxGlobal(void)
 {
 	return m_v3Max;
 }
 
-bool Simplex::MyOctant::IsColliding(uint a_uRBIndex)
+bool MyOctant::IsColliding(uint a_uRBIndex)
 {
 	uint nObjectCount = m_pEntityMngr->GetEntityCount();
 	// no collision if the given index is greater than the # of entities in our box
@@ -217,7 +217,7 @@ bool Simplex::MyOctant::IsColliding(uint a_uRBIndex)
 	return true;
 }
 
-void Simplex::MyOctant::Display(uint a_nIndex, vector3 a_v3Color)
+void MyOctant::Display(uint a_nIndex, vector3 a_v3Color)
 {
 	//Displays a specific octant, specified by the index. Includes the objects underneath it (I assume this means its leafs)
 	if (m_uID == a_nIndex)
@@ -233,7 +233,7 @@ void Simplex::MyOctant::Display(uint a_nIndex, vector3 a_v3Color)
 	}
 }
 
-void Simplex::MyOctant::Display(vector3 a_v3Color)
+void MyOctant::Display(vector3 a_v3Color)
 {
 	for (uint nIndex = 0; nIndex < m_uChildren; nIndex++)
 	{
@@ -243,7 +243,7 @@ void Simplex::MyOctant::Display(vector3 a_v3Color)
 		glm::scale(vector3(m_fSize)), a_v3Color, RENDER_WIRE);
 }
 
-void Simplex::MyOctant::DisplayLeafs(vector3 a_v3Color)
+void MyOctant::DisplayLeafs(vector3 a_v3Color)
 {
 	// Displays the non-empty leafs in the octree
 	// Check each leaf - see if it contains any entities
@@ -258,7 +258,7 @@ void Simplex::MyOctant::DisplayLeafs(vector3 a_v3Color)
 		glm::scale(vector3(m_fSize)), a_v3Color, RENDER_WIRE);
 }
 
-void Simplex::MyOctant::ClearEntityList(void)
+void MyOctant::ClearEntityList(void)
 {
 	for (uint i = 0; i < m_uChildren; i++)
 	{
@@ -267,7 +267,7 @@ void Simplex::MyOctant::ClearEntityList(void)
 	m_EntityList.clear();
 }
 
-void Simplex::MyOctant::Subdivide(void)
+void MyOctant::Subdivide(void)
 {
 	// Return if we're at the maximum depth
 	if (m_uLevel >= m_uMaxLevel)
@@ -330,7 +330,7 @@ void Simplex::MyOctant::Subdivide(void)
 	}
 }
 
-MyOctant* Simplex::MyOctant::GetChild(uint a_nChild)
+MyOctant* MyOctant::GetChild(uint a_nChild)
 {
 	// Return nothing if the index is bad
 	if (a_nChild > 7)
@@ -338,19 +338,19 @@ MyOctant* Simplex::MyOctant::GetChild(uint a_nChild)
 	return m_pChild[a_nChild];
 }
 
-MyOctant* Simplex::MyOctant::GetParent(void)
+MyOctant* MyOctant::GetParent(void)
 {
 	return m_pParent;
 }
 
-bool Simplex::MyOctant::IsLeaf(void)
+bool MyOctant::IsLeaf(void)
 {
 	if (m_uChildren == 0)
 		return true;
 	return false;
 }
 
-bool Simplex::MyOctant::ContainsMoreThan(uint a_nEntities)
+bool MyOctant::ContainsMoreThan(uint a_nEntities)
 {
 	uint nCount = 0;
 	uint nObjects = m_pEntityMngr->GetEntityCount();
@@ -364,7 +364,7 @@ bool Simplex::MyOctant::ContainsMoreThan(uint a_nEntities)
 	return false;
 }
 
-void Simplex::MyOctant::KillBranches(void)
+void MyOctant::KillBranches(void)
 {
 	// Recursion here
 	// Essentially goes through the tree until it hits a node with no children.
@@ -379,7 +379,7 @@ void Simplex::MyOctant::KillBranches(void)
 	m_uChildren = 0;
 }
 
-void Simplex::MyOctant::ConstructTree(uint a_nMaxLevel)
+void MyOctant::ConstructTree(uint a_nMaxLevel)
 {
 	// Should only apply to the root
 	if (m_uLevel != 0)
@@ -399,7 +399,7 @@ void Simplex::MyOctant::ConstructTree(uint a_nMaxLevel)
 	ConstructList(); // Make the list of objects
 }
 
-void Simplex::MyOctant::AssignIDtoEntity(void)
+void MyOctant::AssignIDtoEntity(void)
 {
 	for (uint i = 0; i < m_uChildren; i++)
 	{
@@ -419,12 +419,12 @@ void Simplex::MyOctant::AssignIDtoEntity(void)
 	}
 }
 
-uint Simplex::MyOctant::GetOctantCount(void)
+uint MyOctant::GetOctantCount(void)
 {
 	return m_uOctantCount;
 }
 
-void Simplex::MyOctant::ConstructList(void)
+void MyOctant::ConstructList(void)
 {
 	for (uint i = 0; i < m_uChildren; i++)
 	{
