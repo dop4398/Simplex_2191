@@ -31,7 +31,7 @@ MyOctant::MyOctant(uint a_nMaxLevel, uint a_nIdealEntityCount)
 	MyRigidBody* pRigidBody = new MyRigidBody(lMinMax);
 	vector3 vHalfWidth = pRigidBody->GetHalfWidth();
 	float fMax = vHalfWidth.x;
-	for (int i = 0; i < 3; i++)
+	for (int i = 1; i < 3; i++)
 	{
 		if (fMax < vHalfWidth[i])
 			fMax = vHalfWidth[i];
@@ -119,9 +119,6 @@ void MyOctant::Init(void)
 	m_uChildren = 0;
 
 	m_fSize = 0.0f;
-
-	m_pMeshMngr = nullptr;
-	m_pEntityMngr = nullptr;
 
 	m_v3Center = vector3(0.0f);
 	m_v3Min = vector3(0.0f);

@@ -23,8 +23,8 @@ void Application::InitVariables(void)
 		for (int j = 0; j < nSquare; j++)
 		{
 			uIndex++;
-			//m_pEntityMngr->AddEntity("Minecraft\\Cube.obj");
-			m_pEntityMngr->AddEntity("H:\\Users\\David\\source\\repos\\IGME.309\\_Binary\\Data\\MOBJ\\Minecraft\\Cube.obj");
+			m_pEntityMngr->AddEntity("Minecraft\\Cube.obj");
+			//m_pEntityMngr->AddEntity("H:\\Users\\David\\source\\repos\\IGME.309\\_Binary\\Data\\MOBJ\\Minecraft\\Cube.obj");
 			vector3 v3Position = vector3(glm::sphericalRand(34.0f));
 			matrix4 m4Position = glm::translate(v3Position);
 			m_pEntityMngr->SetModelMatrix(m4Position);
