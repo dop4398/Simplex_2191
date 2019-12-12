@@ -274,9 +274,10 @@ void MyOctant::Subdivide(void)
 	if (m_uChildren != 0)
 		return;
 
+	// Surprise! you now have 8 children!
 	m_uChildren = 8;
-	float fSize = m_fSize / 4.0f;
-	float fSizeDouble = fSize * 2.0f;
+	float fSize = m_fSize / 4.0f; // quarter the size
+	float fSizeDouble = fSize * 2.0f; // update the double-size
 	vector3 v3Center;
 
 	// *** Make the new octants ***
@@ -316,11 +317,12 @@ void MyOctant::Subdivide(void)
 	v3Center.z += fSizeDouble;
 	m_pChild[7] = new MyOctant(v3Center, fSizeDouble);
 
+	// Set up each child
 	for (uint i = 0; i < 8; i++)
 	{
-		m_pChild[i]->m_pRoot = m_pRoot;
-		m_pChild[i]->m_pParent = this;
-		m_pChild[i]->m_uLevel = m_uLevel + 1;
+		m_pChild[i]->m_pRoot = m_pRoot; // root
+		m_pChild[i]->m_pParent = this; // parent
+		m_pChild[i]->m_uLevel = m_uLevel + 1; // new level
 		// If an octant contains more than the ideal # of entities, subdivide it.
 		if (m_pChild[i]->ContainsMoreThan(m_uIdealEntityCount))
 		{
